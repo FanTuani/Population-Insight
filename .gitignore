@@ -1,0 +1,19 @@
+.venv/
+.playwright-cli/
+.pytest_cache/
+.DS_Store
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Keep the seeded SQLite database, ignore transient SQLite side files.
+data/*.db-shm
+data/*.db-wal
+data/*.db-journal
+
+# Ignore generated artifacts but keep directory placeholders.
+output/charts/*
+!output/charts/.gitkeep
+output/exports/*
+!output/exports/.gitkeep

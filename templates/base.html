@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}人口趋势与分析管理系统{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+    {% block head_extra %}{% endblock %}
+</head>
+<body class="{% if current_user %}app-layout{% else %}auth-page{% endif %}">
+    <div class="shell {% if current_user %}app-shell{% else %}auth-shell{% endif %}">
+        {% if current_user %}
+        <aside class="sidebar">
+            <div class="brand-block">
+                <h1>人口趋势系统</h1>
+            </div>
+            <nav class="nav">
+                <a href="{{ url_for('dashboard_view') }}" class="nav-link {% if request.path == '/' %}active{% endif %}">概览</a>
+                <a href="{{ url_for('records_view') }}" class="nav-link {% if request.path.startswith('/records') %}active{% endif %}">数据管理</a>
+                <a href="{{ url_for('statistics_view') }}" class="nav-link {% if request.path == '/statistics' %}active{% endif %}">统计分析</a>
+                <a href="{{ url_for('charts_view') }}" class="nav-link {% if request.path == '/charts' %}active{% endif %}">图表中心</a>
+                {% if current_user.role == 'admin' %}
+                <a href="{{ url_for('logs_view') }}" class="nav-link {% if request.path == '/logs' %}active{% endif %}">操作日志</a>
+                {% endif %}
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-chip">
+                    <span>{{ current_user.username }}</span>
+                    <strong>{{ '管理员' if current_user.role == 'admin' else '浏览用户' }}</strong>
+                </div>
+                <a href="{{ url_for('logout_view') }}" class="ghost-link">退出登录</a>
+            </div>
+        </aside>
+        {% endif %}
+        <main class="main-panel {% if not current_user %}auth-layout{% endif %}">
+            {% if current_user %}
+            <header class="topbar">
+                <h2>{% block page_title %}系统工作台{% endblock %}</h2>
+            </header>
+            {% endif %}
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <section class="flash-stack">
+                {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </section>
+            {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

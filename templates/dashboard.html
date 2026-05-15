@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block page_title %}概览仪表盘{% endblock %}
+
+{% block content %}
+<section class="hero-strip">
+    <div>
+        <h3>系统概览</h3>
+    </div>
+    <div class="hero-actions">
+        <a href="{{ url_for('records_view') }}" class="primary-button">进入数据管理</a>
+        <a href="{{ url_for('charts_view') }}" class="secondary-button">查看图表中心</a>
+    </div>
+</section>
+
+<section class="metric-grid">
+    <article class="metric-card">
+        <span>总记录数</span>
+        <strong>{{ summary.total_records }}</strong>
+    </article>
+    <article class="metric-card">
+        <span>地区数量</span>
+        <strong>{{ summary.region_count }}</strong>
+    </article>
+    <article class="metric-card">
+        <span>年份范围</span>
+        <strong>{{ summary.min_year or '-' }} - {{ summary.max_year or '-' }}</strong>
+    </article>
+    <article class="metric-card">
+        <span>平均总人口</span>
+        <strong>{{ "{:,.0f}".format(summary.avg_population) if summary.avg_population else '-' }}</strong>
+    </article>
+</section>
+
+<section class="dual-grid">
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <h3>最新年度概况</h3>
+            </div>
+        </div>
+        {% if summary.top_region %}
+        <div class="feature-data">
+            <p class="feature-label">最高总人口地区</p>
+            <h4>{{ summary.top_region.region }}</h4>
+            <p>{{ summary.top_region.year }} 年总人口 {{ "{:,}".format(summary.top_region.total_population) }}</p>
+        </div>
+        {% else %}
+        <p class="muted">暂无概况数据。</p>
+        {% endif %}
+    </article>
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <h3>快捷入口</h3>
+            </div>
+        </div>
+        <div class="quick-links">
+            {% if current_user.role == 'admin' %}
+            <a href="{{ url_for('record_create_view') }}">新增人口数据</a>
+            {% endif %}
+            <a href="{{ url_for('statistics_view') }}">查看统计分析</a>
+            <a href="{{ url_for('charts_view') }}">进入图表中心</a>
+            <a href="{{ url_for('records_view') }}">打开完整数据列表</a>
+        </div>
+    </article>
+</section>
+
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <h3>最近操作记录</h3>
+        </div>
+    </div>
+    <div class="log-stream">
+        {% for log in summary.recent_logs %}
+        <div class="log-item">
+            <span>{{ log.username }}</span>
+            <strong>{{ log.action }}</strong>
+            <em>{{ log.action_time }}</em>
+        </div>
+        {% else %}
+        <p class="muted">暂无操作日志。</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

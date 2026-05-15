@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block page_title %}统计分析{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow">Statistics Filters</p>
+            <h3>统计条件</h3>
+        </div>
+    </div>
+    <form method="get" class="inline-filter">
+        <label><span>地区</span><input type="text" name="region" value="{{ filters.region }}"></label>
+        <label><span>起始年份</span><input type="number" name="start_year" value="{{ filters.start_year }}"></label>
+        <label><span>结束年份</span><input type="number" name="end_year" value="{{ filters.end_year }}"></label>
+        <div class="form-actions">
+            <button type="submit" class="primary-button">更新统计</button>
+        </div>
+    </form>
+</section>
+
+{% if error_message %}
+<section class="panel">
+    <p class="muted">{{ error_message }}</p>
+</section>
+{% elif statistics %}
+<section class="metric-grid">
+    <article class="metric-card">
+        <span>记录数量</span>
+        <strong>{{ statistics.record_count }}</strong>
+    </article>
+    <article class="metric-card">
+        <span>平均总人口</span>
+        <strong>{{ "{:,.0f}".format(statistics.avg_total_population) }}</strong>
+    </article>
+    <article class="metric-card">
+        <span>平均出生率</span>
+        <strong>{{ "%.2f"|format(statistics.avg_birth_rate) }}</strong>
+    </article>
+    <article class="metric-card">
+        <span>平均老龄化率</span>
+        <strong>{{ "%.2f"|format(statistics.avg_aging_rate) }}</strong>
+    </article>
+</section>
+
+<section class="dual-grid">
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow">Peak Value</p>
+                <h3>最高总人口记录</h3>
+            </div>
+        </div>
+        <div class="feature-data">
+            <h4>{{ statistics.max_population.region }}</h4>
+            <p>{{ statistics.max_population.year }} 年</p>
+            <strong>{{ "{:,}".format(statistics.max_population.total_population) }}</strong>
+        </div>
+    </article>
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow">Lowest Value</p>
+                <h3>最低总人口记录</h3>
+            </div>
+        </div>
+        <div class="feature-data">
+            <h4>{{ statistics.min_population.region }}</h4>
+            <p>{{ statistics.min_population.year }} 年</p>
+            <strong>{{ "{:,}".format(statistics.min_population.total_population) }}</strong>
+        </div>
+    </article>
+</section>
+
+<section class="dual-grid">
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow">Growth Summary</p>
+                <h3>地区增长率</h3>
+            </div>
+        </div>
+        <div class="list-stack">
+            {% for item in statistics.growth_summary %}
+            <div class="list-row">
+                <span>{{ item.region }}</span>
+                <strong>{{ "%.2f"|format(item.growth_percent) }}%</strong>
+                <em>{{ item.start_year }} - {{ item.end_year }}</em>
+            </div>
+            {% endfor %}
+        </div>
+    </article>
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow">Top 5 Ranking</p>
+                <h3>总人口排名</h3>
+            </div>
+        </div>
+        <div class="list-stack">
+            {% for item in ranking %}
+            <div class="list-row">
+                <span>#{{ item.rank }} {{ item.region }}</span>
+                <strong>{{ "{:,}".format(item.value) }}</strong>
+                <em>{{ item.year }} 年</em>
+            </div>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+{% endif %}
+{% endblock %}

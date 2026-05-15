@@ -1,0 +1,266 @@
+from __future__ import annotations
+
+from population_insight.db.initializer import init_database
+from population_insight.services.auth_service import login
+from population_insight.services.export_service import export_to_csv
+from population_insight.services.log_service import list_operation_logs
+from population_insight.services.population_service import (
+    add_population_record,
+    delete_population_record,
+    get_population_record_by_id,
+    query_population_records,
+    sort_population_records,
+    update_population_record,
+)
+from population_insight.services.statistics_service import (
+    calculate_statistics,
+    get_region_ranking,
+)
+from population_insight.services.visualization_service import (
+    draw_bar_chart,
+    draw_gender_pie_chart,
+    draw_trend_chart,
+)
+from population_insight.ui.menu import print_banner, print_login_tip, print_menu
+from population_insight.ui.prompts import (
+    pause,
+    prompt_export_path,
+    prompt_filter_conditions,
+    prompt_login_credentials,
+    prompt_population_data,
+    prompt_query_filters,
+    prompt_sort_options,
+    prompt_statistics_filters,
+    prompt_visualization_choice,
+)
+from population_insight.utils.formatters import records_to_table, statistics_to_lines
+from population_insight.utils.validators import ensure_non_negative_number, ensure_year
+
+
+def clean_filters(raw_filters: dict) -> dict:
+    return {key: value for key, value in raw_filters.items() if value not in ("", None)}
+
+
+def show_records(records: list[dict], title: str = "查询结果") -> None:
+    print(f"\n{title}")
+    print(records_to_table(records))
+    print(f"\n共 {len(records)} 条记录。")
+
+
+def handle_add(username: str) -> None:
+    data = prompt_population_data()
+    record_id = add_population_record(data, username=username)
+    print(f"新增成功，记录 ID：{record_id}")
+
+
+def handle_query() -> list[dict]:
+    records = query_population_records(clean_filters(prompt_query_filters()))
+    show_records(records, "基础查询结果")
+    return records
+
+
+def handle_filter() -> list[dict]:
+    records = query_population_records(clean_filters(prompt_filter_conditions()))
+    show_records(records, "条件筛选结果")
+    return records
+
+
+def handle_sort(last_records: list[dict]) -> list[dict]:
+    if not last_records:
+        print("当前没有缓存结果，将自动读取全部数据后排序。")
+        last_records = query_population_records()
+
+    field, order = prompt_sort_options()
+    records = sort_population_records(last_records, field, order)
+    show_records(records, "排序结果")
+    return records
+
+
+def handle_update(username: str) -> None:
+    record_id = int(ensure_non_negative_number(input("请输入要修改的记录 ID：").strip(), "记录ID", integer=True))
+    existing = get_population_record_by_id(record_id)
+    if not existing:
+        raise ValueError("未找到该记录。")
+
+    print("当前记录：")
+    print(records_to_table([existing]))
+    updates = prompt_population_data(existing)
+    update_population_record(record_id, updates, username=username)
+    print("修改成功。")
+
+
+def handle_delete(username: str) -> None:
+    record_id = int(ensure_non_negative_number(input("请输入要删除的记录 ID：").strip(), "记录ID", integer=True))
+    existing = get_population_record_by_id(record_id)
+    if not existing:
+        raise ValueError("未找到该记录。")
+
+    print(records_to_table([existing]))
+    confirm = input("确认删除请输入 y：").strip().lower()
+    if confirm == "y":
+        delete_population_record(record_id, username=username)
+        print("删除成功。")
+    else:
+        print("已取消删除。")
+
+
+def handle_statistics() -> None:
+    region, start_year, end_year = prompt_statistics_filters()
+    statistics = calculate_statistics(
+        region=region or None,
+        start_year=ensure_year(start_year) if start_year else None,
+        end_year=ensure_year(end_year) if end_year else None,
+    )
+    print("\n统计分析结果")
+    print(statistics_to_lines(statistics))
+
+    ranking_year = end_year or start_year or ""
+    ranking = get_region_ranking(
+        metric="total_population",
+        year=ensure_year(ranking_year) if ranking_year else None,
+        top_n=5,
+    )
+    print("\n总人口排名（前 5）")
+    print(records_to_table(ranking, fields=[
+        ("rank", "排名"),
+        ("region", "地区"),
+        ("year", "年份"),
+        ("value", "指标值"),
+    ]))
+
+
+def handle_visualization() -> None:
+    chart_type = prompt_visualization_choice()
+    if chart_type == "1":
+        region = input("请输入地区：").strip()
+        metric = input("请输入指标（如 total_population/birth_rate）：").strip()
+        path = draw_trend_chart(region, metric)
+    elif chart_type == "2":
+        year = ensure_year(input("请输入年份：").strip())
+        metric = input("请输入指标（如 total_population/aging_rate）：").strip()
+        path = draw_bar_chart(year, metric)
+    elif chart_type == "3":
+        region = input("请输入地区：").strip()
+        year = ensure_year(input("请输入年份：").strip())
+        path = draw_gender_pie_chart(region, year)
+    else:
+        raise ValueError("无效的图表类型。")
+
+    print(f"图表已生成：{path}")
+
+
+def handle_export(last_records: list[dict]) -> None:
+    if not last_records:
+        print("当前没有缓存结果，将导出全部数据。")
+        last_records = query_population_records()
+
+    output_path = prompt_export_path()
+    path = export_to_csv(last_records, output_path or None)
+    print(f"导出成功：{path}")
+
+
+def handle_logs() -> None:
+    logs = list_operation_logs()
+    print(
+        records_to_table(
+            logs,
+            fields=[
+                ("id", "ID"),
+                ("username", "用户名"),
+                ("action", "操作"),
+                ("target_id", "目标ID"),
+                ("details", "详情"),
+                ("action_time", "时间"),
+            ],
+        )
+    )
+
+
+def admin_loop(user: dict) -> None:
+    last_records: list[dict] = []
+    while True:
+        print_menu(user["role"])
+        choice = input("请选择功能：").strip()
+        try:
+            if choice == "1":
+                handle_add(user["username"])
+            elif choice == "2":
+                last_records = handle_query()
+            elif choice == "3":
+                last_records = handle_filter()
+            elif choice == "4":
+                last_records = handle_sort(last_records)
+            elif choice == "5":
+                handle_update(user["username"])
+            elif choice == "6":
+                handle_delete(user["username"])
+            elif choice == "7":
+                handle_statistics()
+            elif choice == "8":
+                handle_visualization()
+            elif choice == "9":
+                handle_export(last_records)
+            elif choice == "10":
+                handle_logs()
+            elif choice == "11":
+                print("系统已退出。")
+                break
+            else:
+                print("请输入有效菜单编号。")
+        except ValueError as error:
+            print(f"操作失败：{error}")
+        pause()
+
+
+def viewer_loop(user: dict) -> None:
+    last_records: list[dict] = []
+    while True:
+        print_menu(user["role"])
+        choice = input("请选择功能：").strip()
+        try:
+            if choice == "1":
+                last_records = handle_query()
+            elif choice == "2":
+                last_records = handle_filter()
+            elif choice == "3":
+                last_records = handle_sort(last_records)
+            elif choice == "4":
+                handle_statistics()
+            elif choice == "5":
+                handle_visualization()
+            elif choice == "6":
+                handle_export(last_records)
+            elif choice == "7":
+                print("系统已退出。")
+                break
+            else:
+                print("请输入有效菜单编号。")
+        except ValueError as error:
+            print(f"操作失败：{error}")
+        pause()
+
+
+def run() -> None:
+    init_database()
+    print_banner()
+    print_login_tip()
+
+    user = None
+    while user is None:
+        username, password = prompt_login_credentials()
+        user = login(username, password)
+        if user is None:
+            print("登录失败，请重新输入。")
+
+    print(f"\n欢迎你，{user['username']}（{user['role']}）")
+    if user["role"] == "admin":
+        admin_loop(user)
+    else:
+        viewer_loop(user)
+
+
+if __name__ == "__main__":
+    try:
+        run()
+    except KeyboardInterrupt:
+        print("\n程序已中断。")
