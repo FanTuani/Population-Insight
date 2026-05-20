@@ -3,6 +3,19 @@ from __future__ import annotations
 from population_insight.db.initializer import init_database
 from population_insight.services.auth_service import login
 from population_insight.services.export_service import export_to_csv
+from population_insight.services.extension_service import (
+    add_analysis_report,
+    add_annual_indicator_value,
+    add_data_source,
+    add_population_indicator,
+    add_region,
+    get_population_alerts,
+    list_analysis_reports,
+    list_annual_indicator_values,
+    list_data_sources,
+    list_population_indicators,
+    list_regions,
+)
 from population_insight.services.log_service import list_operation_logs
 from population_insight.services.population_service import (
     add_population_record,
@@ -115,11 +128,14 @@ def handle_statistics() -> None:
     print(statistics_to_lines(statistics))
 
     ranking_year = end_year or start_year or ""
-    ranking = get_region_ranking(
-        metric="total_population",
-        year=ensure_year(ranking_year) if ranking_year else None,
-        top_n=5,
-    )
+    try:
+        ranking = get_region_ranking(
+            metric="total_population",
+            year=ensure_year(ranking_year) if ranking_year else None,
+            top_n=5,
+        )
+    except ValueError:
+        ranking = []
     print("\n总人口排名（前 5）")
     print(records_to_table(ranking, fields=[
         ("rank", "排名"),
@@ -176,6 +192,126 @@ def handle_logs() -> None:
     )
 
 
+def handle_regions(username: str) -> None:
+    print(records_to_table(list_regions(), fields=[
+        ("id", "ID"),
+        ("name", "地区名称"),
+        ("region_type", "类型"),
+        ("admin_code", "行政代码"),
+        ("parent_region", "上级地区"),
+    ]))
+    if input("是否新增地区档案？(y/N)：").strip().lower() == "y":
+        record_id = add_region(
+            {
+                "name": input("地区名称：").strip(),
+                "region_type": input("地区类型：").strip(),
+                "admin_code": input("行政区划代码（可空）：").strip(),
+                "parent_region": input("上级地区（可空）：").strip(),
+                "remarks": input("备注（可空）：").strip(),
+            },
+            username=username,
+        )
+        print(f"地区档案已新增，ID：{record_id}")
+
+
+def handle_data_sources(username: str) -> None:
+    print(records_to_table(list_data_sources(), fields=[
+        ("id", "ID"),
+        ("name", "来源名称"),
+        ("publisher", "发布机构"),
+        ("published_date", "发布日期"),
+        ("reliability_level", "可信等级"),
+    ]))
+    if input("是否新增数据来源？(y/N)：").strip().lower() == "y":
+        record_id = add_data_source(
+            {
+                "name": input("来源名称：").strip(),
+                "publisher": input("发布机构：").strip(),
+                "source_url": input("来源链接（可空）：").strip(),
+                "published_date": input("发布日期 YYYY-MM-DD（可空）：").strip(),
+                "reliability_level": input("可信等级（高/中/低，默认中）：").strip() or "中",
+                "remarks": input("备注（可空）：").strip(),
+            },
+            username=username,
+        )
+        print(f"数据来源已新增，ID：{record_id}")
+
+
+def handle_indicators(username: str) -> None:
+    print("\n指标定义")
+    print(records_to_table(list_population_indicators(), fields=[
+        ("id", "ID"),
+        ("code", "编码"),
+        ("name", "名称"),
+        ("unit", "单位"),
+        ("description", "说明"),
+    ]))
+    print("\n年度扩展指标值")
+    print(records_to_table(list_annual_indicator_values(), fields=[
+        ("id", "ID"),
+        ("region", "地区"),
+        ("year", "年份"),
+        ("indicator_name", "指标"),
+        ("value", "数值"),
+    ]))
+    choice = input("新增 1.指标定义 2.年度指标值 其他.返回：").strip()
+    if choice == "1":
+        record_id = add_population_indicator(
+            {
+                "code": input("指标编码：").strip(),
+                "name": input("指标名称：").strip(),
+                "unit": input("单位：").strip(),
+                "description": input("说明（可空）：").strip(),
+            },
+            username=username,
+        )
+        print(f"指标定义已新增，ID：{record_id}")
+    elif choice == "2":
+        record_id = add_annual_indicator_value(
+            {
+                "region": input("地区：").strip(),
+                "year": input("年份：").strip(),
+                "indicator_code": input("指标编码：").strip(),
+                "value": input("指标值：").strip(),
+                "remarks": input("备注（可空）：").strip(),
+            },
+            username=username,
+        )
+        print(f"年度指标值已新增，ID：{record_id}")
+
+
+def handle_reports(username: str, allow_create: bool = True) -> None:
+    print(records_to_table(list_analysis_reports(), fields=[
+        ("id", "ID"),
+        ("title", "标题"),
+        ("username", "用户"),
+        ("filter_summary", "筛选条件"),
+        ("created_at", "创建时间"),
+    ]))
+    if allow_create and input("是否新增分析报告？(y/N)：").strip().lower() == "y":
+        record_id = add_analysis_report(
+            {
+                "title": input("报告标题：").strip(),
+                "filter_summary": input("筛选条件摘要（可空）：").strip(),
+                "report_summary": input("分析摘要：").strip(),
+            },
+            username=username,
+        )
+        print(f"分析报告已新增，ID：{record_id}")
+
+
+def handle_alerts() -> None:
+    alerts = get_population_alerts()
+    print(records_to_table(alerts, fields=[
+        ("region", "地区"),
+        ("year", "年份"),
+        ("alert_type", "预警类型"),
+        ("severity", "等级"),
+        ("message", "说明"),
+    ]))
+    print(f"\n共 {len(alerts)} 条预警。")
+
+
 def admin_loop(user: dict) -> None:
     last_records: list[dict] = []
     while True:
@@ -203,6 +339,16 @@ def admin_loop(user: dict) -> None:
             elif choice == "10":
                 handle_logs()
             elif choice == "11":
+                handle_regions(user["username"])
+            elif choice == "12":
+                handle_data_sources(user["username"])
+            elif choice == "13":
+                handle_indicators(user["username"])
+            elif choice == "14":
+                handle_reports(user["username"])
+            elif choice == "15":
+                handle_alerts()
+            elif choice == "16":
                 print("系统已退出。")
                 break
             else:
@@ -231,6 +377,10 @@ def viewer_loop(user: dict) -> None:
             elif choice == "6":
                 handle_export(last_records)
             elif choice == "7":
+                handle_reports(user["username"], allow_create=False)
+            elif choice == "8":
+                handle_alerts()
+            elif choice == "9":
                 print("系统已退出。")
                 break
             else:

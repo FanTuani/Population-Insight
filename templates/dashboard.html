@@ -61,7 +61,13 @@
             {% endif %}
             <a href="{{ url_for('statistics_view') }}">查看统计分析</a>
             <a href="{{ url_for('charts_view') }}">进入图表中心</a>
+            <a href="{{ url_for('alerts_view') }}">查看人口预警</a>
+            <a href="{{ url_for('reports_view') }}">分析报告列表</a>
             <a href="{{ url_for('records_view') }}">打开完整数据列表</a>
+            {% if current_user.role == 'admin' %}
+            <a href="{{ url_for('regions_view') }}">维护地区档案</a>
+            <a href="{{ url_for('indicators_view') }}">维护扩展指标</a>
+            {% endif %}
         </div>
     </article>
 </section>

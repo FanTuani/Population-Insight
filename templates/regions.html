@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block page_title %}地区档案管理{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow">Region Profile</p>
+            <h3>新增地区档案</h3>
+        </div>
+    </div>
+    <form method="post" class="form-grid">
+        <label><span>地区名称</span><input type="text" name="name" value="{{ form_data.get('name', '') }}" required></label>
+        <label><span>地区类型</span><input type="text" name="region_type" value="{{ form_data.get('region_type', '') }}" required></label>
+        <label><span>行政区划代码</span><input type="text" name="admin_code" value="{{ form_data.get('admin_code', '') }}"></label>
+        <label><span>上级地区</span><input type="text" name="parent_region" value="{{ form_data.get('parent_region', '') }}"></label>
+        <label class="full-span"><span>备注</span><textarea name="remarks" rows="3">{{ form_data.get('remarks', '') }}</textarea></label>
+        <div class="form-actions full-span">
+            <button type="submit" class="primary-button">保存地区档案</button>
+        </div>
+    </form>
+</section>
+
+<section class="panel">
+    <div class="panel-header spread">
+        <div>
+            <p class="eyebrow">Region List</p>
+            <h3>地区档案列表</h3>
+        </div>
+        <span class="muted">共 {{ regions|length }} 个地区</span>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>地区名称</th>
+                    <th>类型</th>
+                    <th>行政区划代码</th>
+                    <th>上级地区</th>
+                    <th>备注</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for region in regions %}
+                <tr>
+                    <td>{{ region.id }}</td>
+                    <td>{{ region.name }}</td>
+                    <td>{{ region.region_type }}</td>
+                    <td>{{ region.admin_code }}</td>
+                    <td>{{ region.parent_region }}</td>
+                    <td>{{ region.remarks }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="empty-cell">暂无地区档案。</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

@@ -356,6 +356,22 @@ a {
     text-align: right;
 }
 
+.report-row {
+    grid-template-columns: 1.4fr 0.5fr auto;
+}
+
+.report-row p {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.report-row small {
+    color: var(--muted);
+    font-size: 12px;
+}
+
 .filter-grid,
 .form-grid {
     display: grid;

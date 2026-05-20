@@ -109,5 +109,20 @@
         </div>
     </article>
 </section>
+
+<section class="panel slim-panel">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow">Save Report</p>
+            <h3>保存当前分析结果</h3>
+        </div>
+    </div>
+    <form method="post" class="inline-filter">
+        <label><span>报告标题</span><input type="text" name="title" value="{{ filters.region or '全部地区' }}统计分析报告" required></label>
+        <div class="form-actions">
+            <button type="submit" class="primary-button">保存为分析报告</button>
+        </div>
+    </form>
+</section>
 {% endif %}
 {% endblock %}

@@ -28,6 +28,20 @@ from population_insight.services.dashboard_service import (
     get_dashboard_summary,
 )
 from population_insight.services.export_service import export_to_csv
+from population_insight.services.extension_service import (
+    add_analysis_report,
+    add_annual_indicator_value,
+    add_data_source,
+    add_population_indicator,
+    add_region,
+    build_statistics_report_summary,
+    get_population_alerts,
+    list_analysis_reports,
+    list_annual_indicator_values,
+    list_data_sources,
+    list_population_indicators,
+    list_regions,
+)
 from population_insight.services.log_service import list_operation_logs
 from population_insight.services.population_service import (
     add_population_record,
@@ -127,6 +141,13 @@ def _querystring(params: dict) -> str:
     return urlencode(clean_params)
 
 
+def _parse_page(value: str | None) -> int:
+    try:
+        return int(value or 1)
+    except (TypeError, ValueError):
+        return 1
+
+
 @app.before_request
 def load_user() -> None:
     g.user = get_current_user()
@@ -197,7 +218,7 @@ def records_view():
 
     sort_field = _clean_text(request.args.get("sort_field"))
     sort_order = _clean_text(request.args.get("sort_order")) or "asc"
-    page = int(request.args.get("page", 1) or 1)
+    page = _parse_page(request.args.get("page"))
 
     records = query_population_records(filters)
     try:
@@ -276,7 +297,7 @@ def record_delete_view(record_id: int):
     return redirect(url_for("records_view"))
 
 
-@app.route("/statistics")
+@app.route("/statistics", methods=["GET", "POST"])
 @login_required
 def statistics_view():
     region = _clean_text(request.args.get("region")) or None
@@ -292,7 +313,27 @@ def statistics_view():
         end_year = ensure_year(end_year_text) if end_year_text else None
         statistics = calculate_statistics(region=region, start_year=start_year, end_year=end_year)
         ranking_year = end_year or start_year
-        ranking = get_region_ranking(metric="total_population", year=ranking_year, top_n=5)
+        try:
+            ranking = get_region_ranking(metric="total_population", year=ranking_year, top_n=5)
+        except ValueError:
+            ranking = []
+        if request.method == "POST" and statistics:
+            report_title = _clean_text(request.form.get("title")) or "统计分析报告"
+            filters = {
+                "region": region or "全部地区",
+                "start_year": start_year_text or "不限",
+                "end_year": end_year_text or "不限",
+            }
+            add_analysis_report(
+                {
+                    "title": report_title,
+                    "filter_summary": str(filters),
+                    "report_summary": build_statistics_report_summary(statistics, filters),
+                },
+                username=g.user["username"],
+            )
+            flash("分析报告已保存。", "success")
+            return redirect(url_for("reports_view"))
     except ValueError as error:
         error_message = str(error)
 
@@ -343,6 +384,90 @@ def export_records():
 def logs_view():
     logs = list_operation_logs(limit=100)
     return render_template("logs.html", logs=logs)
+
+
+@app.route("/regions", methods=["GET", "POST"])
+@admin_required
+def regions_view():
+    form_data = {}
+    if request.method == "POST":
+        form_data = request.form.to_dict()
+        try:
+            add_region(form_data, username=g.user["username"])
+            flash("地区档案已新增。", "success")
+            return redirect(url_for("regions_view"))
+        except ValueError as error:
+            flash(str(error), "error")
+    return render_template("regions.html", regions=list_regions(), form_data=form_data)
+
+
+@app.route("/sources", methods=["GET", "POST"])
+@admin_required
+def sources_view():
+    form_data = {}
+    if request.method == "POST":
+        form_data = request.form.to_dict()
+        try:
+            add_data_source(form_data, username=g.user["username"])
+            flash("数据来源已新增。", "success")
+            return redirect(url_for("sources_view"))
+        except ValueError as error:
+            flash(str(error), "error")
+    return render_template("sources.html", sources=list_data_sources(), form_data=form_data)
+
+
+@app.route("/indicators", methods=["GET", "POST"])
+@admin_required
+def indicators_view():
+    form_data = {}
+    if request.method == "POST":
+        form_data = request.form.to_dict()
+        try:
+            add_population_indicator(form_data, username=g.user["username"])
+            flash("扩展指标已新增。", "success")
+            return redirect(url_for("indicators_view"))
+        except ValueError as error:
+            flash(str(error), "error")
+    return render_template(
+        "indicators.html",
+        indicators=list_population_indicators(),
+        values=list_annual_indicator_values(),
+        regions=get_distinct_regions(),
+        form_data=form_data,
+    )
+
+
+@app.route("/indicator-values", methods=["POST"])
+@admin_required
+def indicator_values_create_view():
+    try:
+        add_annual_indicator_value(request.form.to_dict(), username=g.user["username"])
+        flash("年度扩展指标值已新增。", "success")
+    except ValueError as error:
+        flash(str(error), "error")
+    return redirect(url_for("indicators_view"))
+
+
+@app.route("/reports", methods=["GET", "POST"])
+@login_required
+def reports_view():
+    form_data = {}
+    if request.method == "POST":
+        form_data = request.form.to_dict()
+        try:
+            add_analysis_report(form_data, username=g.user["username"])
+            flash("分析报告已新增。", "success")
+            return redirect(url_for("reports_view"))
+        except ValueError as error:
+            flash(str(error), "error")
+    return render_template("reports.html", reports=list_analysis_reports(), form_data=form_data)
+
+
+@app.route("/alerts")
+@login_required
+def alerts_view():
+    alerts = get_population_alerts()
+    return render_template("alerts.html", alerts=alerts)
 
 
 @app.route("/api/charts/trend")

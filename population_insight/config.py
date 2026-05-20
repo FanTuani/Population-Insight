@@ -270,3 +270,69 @@ INITIAL_POPULATION_RECORDS = [
         remarks="依据2024年广东省国民经济和社会发展统计公报整理，老龄化率按60岁及以上常住人口占比。",
     ),
 ]
+
+INITIAL_REGIONS = [
+    {
+        "name": "北京市",
+        "region_type": "直辖市",
+        "admin_code": "110000",
+        "parent_region": "中国",
+        "remarks": "国家中心城市，人口结构变化具有代表性。",
+    },
+    {
+        "name": "广东省",
+        "region_type": "省",
+        "admin_code": "440000",
+        "parent_region": "中国",
+        "remarks": "常住人口规模长期位居全国前列。",
+    },
+]
+
+INITIAL_DATA_SOURCES = [
+    {
+        "name": "北京市人口统计",
+        "publisher": "北京市人民政府",
+        "source_url": "https://www.beijing.gov.cn/renwen/bjgk/rk/rktj/",
+        "published_date": "2025-03-01",
+        "reliability_level": "高",
+        "remarks": "用于北京市人口年度数据核验。",
+    },
+    {
+        "name": "广东省统计公报",
+        "publisher": "广东省统计局",
+        "source_url": "https://stats.gd.gov.cn/",
+        "published_date": "2025-03-01",
+        "reliability_level": "高",
+        "remarks": "用于广东省人口年度数据核验。",
+    },
+]
+
+INITIAL_POPULATION_INDICATORS = [
+    {
+        "code": "child_ratio",
+        "name": "少儿人口占比",
+        "unit": "%",
+        "description": "0-14岁人口占常住人口比重。",
+    },
+    {
+        "code": "working_age_ratio",
+        "name": "劳动年龄人口占比",
+        "unit": "%",
+        "description": "15-59岁人口占常住人口比重。",
+    },
+    {
+        "code": "dependency_ratio",
+        "name": "总抚养比",
+        "unit": "%",
+        "description": "少儿与老年人口对劳动年龄人口的比例。",
+    },
+]
+
+INITIAL_ANNUAL_INDICATOR_VALUES = [
+    {"region": "北京市", "year": 2024, "indicator_code": "child_ratio", "value": 11.2, "remarks": "样例扩展指标。"},
+    {"region": "北京市", "year": 2024, "indicator_code": "working_age_ratio", "value": 65.3, "remarks": "样例扩展指标。"},
+    {"region": "北京市", "year": 2024, "indicator_code": "dependency_ratio", "value": 53.1, "remarks": "样例扩展指标。"},
+    {"region": "广东省", "year": 2024, "indicator_code": "child_ratio", "value": 18.6, "remarks": "样例扩展指标。"},
+    {"region": "广东省", "year": 2024, "indicator_code": "working_age_ratio", "value": 66.5, "remarks": "样例扩展指标。"},
+    {"region": "广东省", "year": 2024, "indicator_code": "dependency_ratio", "value": 50.4, "remarks": "样例扩展指标。"},
+]

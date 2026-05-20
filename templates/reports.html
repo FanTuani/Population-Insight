@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block page_title %}分析报告{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow">Analysis Report</p>
+            <h3>新增分析报告</h3>
+        </div>
+    </div>
+    <form method="post" class="form-grid">
+        <label><span>报告标题</span><input type="text" name="title" value="{{ form_data.get('title', '') }}" required></label>
+        <label><span>筛选条件摘要</span><input type="text" name="filter_summary" value="{{ form_data.get('filter_summary', '') }}"></label>
+        <label class="full-span"><span>分析摘要</span><textarea name="report_summary" rows="4" required>{{ form_data.get('report_summary', '') }}</textarea></label>
+        <div class="form-actions full-span">
+            <button type="submit" class="primary-button">保存报告</button>
+        </div>
+    </form>
+</section>
+
+<section class="panel">
+    <div class="panel-header spread">
+        <div>
+            <p class="eyebrow">Report List</p>
+            <h3>报告列表</h3>
+        </div>
+        <span class="muted">共 {{ reports|length }} 份报告</span>
+    </div>
+    <div class="list-stack">
+        {% for report in reports %}
+        <div class="list-row report-row">
+            <span>{{ report.title }}<br><small>{{ report.filter_summary }}</small></span>
+            <strong>{{ report.username }}</strong>
+            <em>{{ report.created_at }}</em>
+            <p>{{ report.report_summary }}</p>
+        </div>
+        {% else %}
+        <p class="muted">暂无分析报告。</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

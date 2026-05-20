@@ -20,7 +20,12 @@
                 <a href="{{ url_for('records_view') }}" class="nav-link {% if request.path.startswith('/records') %}active{% endif %}">数据管理</a>
                 <a href="{{ url_for('statistics_view') }}" class="nav-link {% if request.path == '/statistics' %}active{% endif %}">统计分析</a>
                 <a href="{{ url_for('charts_view') }}" class="nav-link {% if request.path == '/charts' %}active{% endif %}">图表中心</a>
+                <a href="{{ url_for('alerts_view') }}" class="nav-link {% if request.path == '/alerts' %}active{% endif %}">预警分析</a>
+                <a href="{{ url_for('reports_view') }}" class="nav-link {% if request.path == '/reports' %}active{% endif %}">分析报告</a>
                 {% if current_user.role == 'admin' %}
+                <a href="{{ url_for('regions_view') }}" class="nav-link {% if request.path == '/regions' %}active{% endif %}">地区档案</a>
+                <a href="{{ url_for('sources_view') }}" class="nav-link {% if request.path == '/sources' %}active{% endif %}">数据来源</a>
+                <a href="{{ url_for('indicators_view') }}" class="nav-link {% if request.path in ['/indicators', '/indicator-values'] %}active{% endif %}">扩展指标</a>
                 <a href="{{ url_for('logs_view') }}" class="nav-link {% if request.path == '/logs' %}active{% endif %}">操作日志</a>
                 {% endif %}
             </nav>
