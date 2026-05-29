@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ '新增人口记录' if mode == 'create' else '编辑人口记录' }}{% endblock %}
+
+{% block content %}
+<section class="panel slim-panel">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow">Record Form</p>
+            <h3>{{ '新增人口记录' if mode == 'create' else '编辑人口记录' }}</h3>
+        </div>
+    </div>
+
+    <form method="post" class="form-grid">
+        <label><span>地区</span><input type="text" name="region" value="{{ form_data.get('region', '') }}" required></label>
+        <label><span>年份</span><input type="number" name="year" value="{{ form_data.get('year', '') }}" required></label>
+        <label><span>总人口</span><input type="number" name="total_population" value="{{ form_data.get('total_population', '') }}" required></label>
+        <label><span>男性人口</span><input type="number" name="male_population" value="{{ form_data.get('male_population', '') }}" required></label>
+        <label><span>女性人口</span><input type="number" name="female_population" value="{{ form_data.get('female_population', '') }}" required></label>
+        <label><span>出生率</span><input type="number" step="0.01" name="birth_rate" value="{{ form_data.get('birth_rate', '') }}" required></label>
+        <label><span>死亡率</span><input type="number" step="0.01" name="death_rate" value="{{ form_data.get('death_rate', '') }}" required></label>
+        <label><span>老龄化率</span><input type="number" step="0.01" name="aging_rate" value="{{ form_data.get('aging_rate', '') }}" required></label>
+        <label><span>城镇化率</span><input type="number" step="0.01" name="urbanization_rate" value="{{ form_data.get('urbanization_rate', '') }}" required></label>
+        <label class="full-span"><span>备注</span><textarea name="remarks" rows="4">{{ form_data.get('remarks', '') }}</textarea></label>
+        <div class="form-actions full-span">
+            <button type="submit" class="primary-button">{{ '保存新增记录' if mode == 'create' else '保存修改' }}</button>
+            <a href="{{ url_for('records_view') }}" class="ghost-link">返回列表</a>
+        </div>
+    </form>
+</section>
+{% endblock %}
