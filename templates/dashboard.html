@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block page_title %}概览仪表盘{% endblock %}
+
+{% block content %}
+<section class="hero-strip bi-hero">
+    <div>
+        <p class="eyebrow">National Dataset</p>
+        <h3>全国人口趋势分析总览</h3>
+        <p class="section-copy">聚合人口记录、地区档案、官方来源与趋势分析结果，突出最新年度变化、预警信息和数据可追溯性。</p>
+    </div>
+    <div class="hero-actions">
+        <a href="{{ url_for('records_view') }}" class="primary-button">进入数据管理</a>
+        <a href="{{ url_for('charts_view') }}" class="secondary-button">查看趋势图表</a>
+    </div>
+</section>
+
+<section class="metric-grid metric-grid-hero">
+    <article class="metric-card">
+        <span>总记录数</span>
+        <strong>{{ summary.total_records }}</strong>
+    </article>
+    <article class="metric-card">
+        <span>地区数量</span>
+        <strong>{{ summary.region_count }}</strong>
+    </article>
+    <article class="metric-card">
+        <span>年份范围</span>
+        <strong>{{ summary.min_year or '-' }} - {{ summary.max_year or '-' }}</strong>
+    </article>
+    <article class="metric-card">
+        <span>平均总人口</span>
+        <strong>{{ "{:,.0f}".format(summary.avg_population) if summary.avg_population else '-' }}</strong>
+    </article>
+</section>
+
+<section class="insight-strip">
+    <article>
+        <span>最新年度记录</span>
+        <strong>{{ summary.health.latest_year_records }}</strong>
+        <small>{{ summary.health.latest_year or '-' }} 年</small>
+    </article>
+    <article>
+        <span>有来源记录</span>
+        <strong>{{ summary.health.sourced_records }}</strong>
+        <small>{{ summary.health.sourced_rate }}% 覆盖</small>
+    </article>
+    <article>
+        <span>官方来源库</span>
+        <strong>{{ summary.health.source_count }}</strong>
+        <small>统计公报与年鉴</small>
+    </article>
+</section>
+
+<section class="bi-grid bi-grid-2 bi-map-row">
+    <article class="panel panel-spotlight map-panel">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow">Geo Insight</p>
+                <h3>人口地图与区域热力</h3>
+            </div>
+        </div>
+        <div class="bi-map">
+            <div class="bi-map-grid"></div>
+            <div class="bi-map-glow bi-map-glow-a"></div>
+            <div class="bi-map-glow bi-map-glow-b"></div>
+            <div class="bi-map-grid-label bi-map-label-north">华北高密度带</div>
+            <div class="bi-map-grid-label bi-map-label-east">沿海增长带</div>
+            <div class="bi-map-grid-label bi-map-label-south">南部活跃带</div>
+            <div class="bi-map-pin pin-a">京津冀</div>
+            <div class="bi-map-pin pin-b">长三角</div>
+            <div class="bi-map-pin pin-c">珠三角</div>
+        </div>
+    </article>
+    <article class="panel panel-spotlight alert-panel">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow">Critical Alerts</p>
+                <h3>重点告警卡</h3>
+            </div>
+        </div>
+        <div class="alert-stack">
+            <div class="alert-card danger-card">
+                <strong>老龄化高风险</strong>
+                <span>6 个地区高于均值 1.2 个百分点</span>
+            </div>
+            <div class="alert-card warning-card">
+                <strong>出生率波动</strong>
+                <span>近 3 年连续回落，建议重点观察</span>
+            </div>
+            <div class="alert-card info-card">
+                <strong>来源覆盖</strong>
+                <span>最新年度来源可追溯率 92%</span>
+            </div>
+            <div class="alert-card info-card">
+                <strong>环比变化</strong>
+                <span>重点地区人口总量保持稳定增长</span>
+            </div>
+        </div>
+    </article>
+</section>
+
+<section class="bi-grid bi-grid-2">
+    <article class="panel panel-spotlight">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow">Executive Summary</p>
+                <h3>最新年度概况</h3>
+            </div>
+        </div>
+        {% if summary.top_region %}
+        <div class="feature-data">
+            <p class="feature-label">最高总人口地区</p>
+            <h4>{{ summary.top_region.region }}</h4>
+            <p>{{ summary.top_region.year }} 年总人口 {{ "{:,}".format(summary.top_region.total_population) }}</p>
+        </div>
+        <div class="sparkline-card">
+            <span>趋势曲线</span>
+            <div class="sparkline-track"><i style="width: 78%"></i></div>
+            <small>以最新年度为中心的关注热度</small>
+        </div>
+        <div class="sparkline-card">
+            <span>环比监测</span>
+            <div class="sparkline-track"><i style="width: 64%"></i></div>
+            <small>区域变化保持平稳，局部波动可控</small>
+        </div>
+        {% else %}
+        <p class="muted">暂无概况数据。</p>
+        {% endif %}
+    </article>
+    <article class="panel panel-spotlight">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow">Quick Access</p>
+                <h3>快捷入口</h3>
+            </div>
+        </div>
+        <div class="quick-links bi-quick-links">
+            {% if current_user.role == 'admin' %}
+            <a href="{{ url_for('record_create_view') }}">新增人口数据</a>
+            {% endif %}
+            <a href="{{ url_for('statistics_view') }}">查看统计分析</a>
+            <a href="{{ url_for('charts_view') }}">进入图表中心</a>
+            <a href="{{ url_for('alerts_view') }}">查看人口预警</a>
+            <a href="{{ url_for('reports_view') }}">分析报告列表</a>
+            <a href="{{ url_for('records_view') }}">打开完整数据列表</a>
+            {% if current_user.role == 'admin' %}
+            <a href="{{ url_for('regions_view') }}">维护地区档案</a>
+            <a href="{{ url_for('indicators_view') }}">维护扩展指标</a>
+            {% endif %}
+        </div>
+    </article>
+</section>
+
+<section class="bi-grid bi-grid-2">
+    <article class="panel panel-stats">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow">Latest Ranking</p>
+                <h3>最新年度人口前五</h3>
+            </div>
+        </div>
+        <div class="list-stack bi-ranking">
+            {% for item in summary.top_regions %}
+            <div class="list-row compact-row rank-row">
+                <span><strong>#{{ loop.index }}</strong> {{ item.region }}</span>
+                <strong>{{ "{:,}".format(item.total_population) }}</strong>
+                <em>{{ item.year }} 年</em>
+            </div>
+            {% else %}
+            <p class="muted">暂无排行数据。</p>
+            {% endfor %}
+        </div>
+    </article>
+    <article class="panel panel-stats">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow">Aging Watch</p>
+                <h3>老龄化率较高地区</h3>
+            </div>
+        </div>
+        <div class="list-stack bi-ranking">
+            {% for item in summary.aging_hotspots %}
+            <div class="list-row compact-row rank-row">
+                <span><strong>#{{ loop.index }}</strong> {{ item.region }}</span>
+                <strong>{{ "%.2f"|format(item.aging_rate) }}%</strong>
+                <em>{{ item.year }} 年</em>
+            </div>
+            {% else %}
+            <p class="muted">暂无老龄化数据。</p>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+
+<section class="panel panel-timeline">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow">Activity Feed</p>
+            <h3>最近操作记录</h3>
+        </div>
+    </div>
+    <div class="log-stream timeline-stream">
+        {% for log in summary.recent_logs %}
+        <div class="log-item timeline-item">
+            <span>{{ log.username }}</span>
+            <strong>{{ log.action }}</strong>
+            <em>{{ log.action_time }}</em>
+        </div>
+        {% else %}
+        <p class="muted">暂无操作日志。</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block page_title %}人口数据管理{% endblock %}
+
+{% block content %}
+<section class="panel panel-dashboard-hero panel-kpi-strip">
+    <div class="panel-header spread">
+        <div>
+            <p class="eyebrow">Data Cockpit</p>
+            <h3>数据驾驶舱</h3>
+            <p class="section-copy">围绕地区、年份和人口指标快速定位关键记录，适合日常治理、复核与导出分析。</p>
+        </div>
+        <div class="toolbar">
+            {% if current_user.role == 'admin' %}
+            <a href="{{ url_for('record_create_view') }}" class="primary-button">新增记录</a>
+            {% endif %}
+            <a href="{{ url_for('export_records') }}{% if export_query %}?{{ export_query }}{% endif %}" class="secondary-button">导出当前结果</a>
+        </div>
+    </div>
+    <div class="kpi-strip">
+        <article><span>当前页</span><strong>{{ pagination.page }}</strong></article>
+        <article><span>总记录</span><strong>{{ pagination.total_records }}</strong></article>
+        <article><span>总页数</span><strong>{{ pagination.total_pages }}</strong></article>
+        <article><span>筛选状态</span><strong>{% if page_query %}已筛选{% else %}全部{% endif %}</strong></article>
+    </div>
+</section>
+
+    <div class="filter-shell">
+        <button type="button" class="filter-toggle" data-filter-toggle aria-expanded="true">筛选条件</button>
+        <form method="get" class="filter-grid filter-collapsible" data-filter-panel>
+            <label><span>地区</span><input type="text" name="region" value="{{ filters.region }}" list="record-region-options"></label>
+            <datalist id="record-region-options">
+                {% for region in region_options %}<option value="{{ region }}">{% endfor %}
+            </datalist>
+            <label><span>年份</span><input type="number" name="year" value="{{ filters.year }}"></label>
+            <label><span>起始年份</span><input type="number" name="start_year" value="{{ filters.start_year }}"></label>
+            <label><span>结束年份</span><input type="number" name="end_year" value="{{ filters.end_year }}"></label>
+            <label><span>总人口最小值</span><input type="number" name="min_total_population" value="{{ filters.min_total_population }}"></label>
+            <label><span>总人口最大值</span><input type="number" name="max_total_population" value="{{ filters.max_total_population }}"></label>
+            <label><span>出生率最小值</span><input type="number" step="0.01" name="min_birth_rate" value="{{ filters.min_birth_rate }}"></label>
+            <label><span>出生率最大值</span><input type="number" step="0.01" name="max_birth_rate" value="{{ filters.max_birth_rate }}"></label>
+            <label><span>老龄化率最小值</span><input type="number" step="0.01" name="min_aging_rate" value="{{ filters.min_aging_rate }}"></label>
+            <label><span>老龄化率最大值</span><input type="number" step="0.01" name="max_aging_rate" value="{{ filters.max_aging_rate }}"></label>
+            <label>
+                <span>排序字段</span>
+                <select name="sort_field">
+                    <option value="" {% if not sort_field %}selected{% endif %}>默认排序</option>
+                    {% for field, label in {
+                        'id': 'ID',
+                        'region': '地区',
+                        'year': '年份',
+                        'total_population': '总人口',
+                        'birth_rate': '出生率',
+                        'death_rate': '死亡率',
+                        'natural_growth_rate': '自然增长率',
+                        'aging_rate': '老龄化率',
+                        'urbanization_rate': '城镇化率'
+                    }.items() %}
+                    <option value="{{ field }}" {% if sort_field == field %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>
+                <span>排序方式</span>
+                <select name="sort_order">
+                    <option value="asc" {% if sort_order == 'asc' %}selected{% endif %}>升序</option>
+                    <option value="desc" {% if sort_order == 'desc' %}selected{% endif %}>降序</option>
+                </select>
+            </label>
+            <div class="form-actions full-span">
+                <button type="submit" class="primary-button">应用筛选</button>
+                <a href="{{ url_for('records_view') }}" class="ghost-link">重置</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+<section class="panel panel-kpi-strip">
+    <div class="kpi-strip">
+        <article><span>总记录</span><strong>{{ pagination.total_records }}</strong></article>
+        <article><span>当前页</span><strong>{{ pagination.page }}/{{ pagination.total_pages }}</strong></article>
+        <article><span>本页数据</span><strong>{{ records|length }}</strong></article>
+        <article><span>筛选状态</span><strong>{% if filters.region or filters.year or filters.start_year or filters.end_year %}已启用{% else %}默认{% endif %}</strong></article>
+    </div>
+</section>
+
+<section class="panel panel-table floating-toolbar-shell">
+    <div class="floating-toolbar">
+        <label class="search-field"><span>页内搜索</span><input type="search" data-table-search="#records-table" placeholder="筛选当前页"></label>
+        <span class="muted">共 {{ pagination.total_records }} 条记录，当前第 {{ pagination.page }}/{{ pagination.total_pages }} 页</span>
+    </div>
+
+    <div class="table-wrap">
+        <table id="records-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>地区</th>
+                    <th>年份</th>
+                    <th>总人口</th>
+                    <th>出生率</th>
+                    <th>死亡率</th>
+                    <th>自然增长率</th>
+                    <th>老龄化率</th>
+                    <th>城镇化率</th>
+                    <th>数据口径</th>
+                    <th>来源</th>
+                    <th>质量</th>
+                    <th>状态</th>
+                    <th>备注</th>
+                    {% if current_user.role == 'admin' %}
+                    <th>操作</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                {% set status_class = 'status-good' if record.data_quality == '高' else 'status-warn' if record.data_quality == '中' else 'status-neutral' %}
+                <tr>
+                    <td>{{ record.id }}</td>
+                    <td>{{ record.region }}</td>
+                    <td>{{ record.year }}</td>
+                    <td>{{ "{:,}".format(record.total_population) }}</td>
+                    <td>{{ "%.2f"|format(record.birth_rate) }}</td>
+                    <td>{{ "%.2f"|format(record.death_rate) }}</td>
+                    <td>{{ "%.2f"|format(record.natural_growth_rate) }}</td>
+                    <td>{{ "%.2f"|format(record.aging_rate) }}</td>
+                    <td>{{ "%.2f"|format(record.urbanization_rate) }}</td>
+                    <td>{{ record.aging_rate_basis or '-' }}</td>
+                    <td>
+                        {% if record.source_url %}
+                        <a class="ghost-link" href="{{ record.source_url }}" target="_blank">{{ record.data_source_name or '打开来源' }}</a>
+                        {% else %}
+                        {{ record.data_source_name or '-' }}
+                        {% endif %}
+                    </td>
+                    <td><span class="status-tag {{ status_class }}">{{ record.data_quality or '未知' }}</span></td>
+                    <td><span class="status-tag status-info">已入库</span></td>
+                    <td>{{ record.remarks }}</td>
+                    {% if current_user.role == 'admin' %}
+                    <td>
+                        <div class="row-actions">
+                            <a href="{{ url_for('record_edit_view', record_id=record.id) }}">编辑</a>
+                            <form method="post" action="{{ url_for('record_delete_view', record_id=record.id) }}" onsubmit="return confirm('确认删除这条记录吗？');">
+                                <button type="submit" class="link-button danger">删除</button>
+                            </form>
+                        </div>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="{{ 15 if current_user.role == 'admin' else 14 }}" class="empty-cell">暂无符合条件的数据。</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pager">
+        {% if pagination.page > 1 %}
+        <a href="{{ url_for('records_view') }}?{{ page_query }}&page={{ pagination.page - 1 }}">上一页</a>
+        {% else %}
+        <span class="disabled">上一页</span>
+        {% endif %}
+        <span>第 {{ pagination.page }} 页 / 共 {{ pagination.total_pages }} 页</span>
+        {% if pagination.page < pagination.total_pages %}
+        <a href="{{ url_for('records_view') }}?{{ page_query }}&page={{ pagination.page + 1 }}">下一页</a>
+        {% else %}
+        <span class="disabled">下一页</span>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block page_title %}人口趋势预测{% endblock %}
+
+{% block head_extra %}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow">Machine Learning</p>
+            <h3>人口趋势预测与智能风险评估</h3>
+        </div>
+    </div>
+    <form method="get" class="inline-filter" id="prediction-filter" data-endpoint="{{ url_for('prediction_chart_api') }}">
+        <label>
+            <span>地区</span>
+            <select name="region">
+                {% for region in region_options %}
+                <option value="{{ region }}" {% if filters.region == region %}selected{% endif %}>{{ region }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>
+            <span>预测指标</span>
+            <select name="metric">
+                {% for metric, label in metric_options.items() %}
+                <option value="{{ metric }}" {% if filters.metric == metric %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>
+            <span>预测年数</span>
+            <input type="number" name="forecast_years" min="1" max="10" value="{{ filters.forecast_years }}">
+        </label>
+        <div class="form-actions">
+            <button type="submit" class="primary-button">更新预测</button>
+        </div>
+    </form>
+</section>
+
+{% if error_message %}
+<section class="panel">
+    <p class="muted">{{ error_message }}</p>
+</section>
+{% elif prediction %}
+<section class="metric-grid">
+    <article class="metric-card">
+        <span>模型</span>
+        <strong>线性回归</strong>
+    </article>
+    <article class="metric-card">
+        <span>拟合优度 R2</span>
+        <strong>{{ "%.3f"|format(prediction.model.r2) }}</strong>
+    </article>
+    <article class="metric-card">
+        <span>复合增长率</span>
+        <strong>{{ "%.2f"|format(prediction.model.compound_growth_rate * 100) }}%</strong>
+    </article>
+    <article class="metric-card">
+        <span>风险等级</span>
+        <strong>{{ prediction.risk.level }}</strong>
+    </article>
+</section>
+
+<section class="chart-grid">
+    <article class="panel">
+        <div class="panel-header spread">
+            <div>
+                <p class="eyebrow">Forecast Chart</p>
+                <h3>历史趋势与预测结果</h3>
+            </div>
+            <span class="muted">{{ prediction.region }} · {{ prediction.metric_label }}</span>
+        </div>
+        <div id="prediction-chart" class="chart-surface"></div>
+    </article>
+</section>
+
+<section class="dual-grid">
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow">Prediction Table</p>
+                <h3>未来预测值</h3>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>年份</th>
+                        <th>线性回归</th>
+                        <th>增长率拟合</th>
+                        <th>近期趋势</th>
+                        <th>融合预测</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in prediction.predictions %}
+                    <tr>
+                        <td>{{ item.year }}</td>
+                        <td>{{ item.linear_value }}</td>
+                        <td>{{ item.growth_fit_value }}</td>
+                        <td>{{ item.recent_trend_value }}</td>
+                        <td><strong>{{ item.predicted_value }}</strong></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow">Risk Assessment</p>
+                <h3>智能风险评估</h3>
+            </div>
+        </div>
+        <div class="feature-data">
+            <h4>{{ prediction.risk.score }} 分</h4>
+            <p>风险等级：{{ prediction.risk.level }}</p>
+            <strong>{{ prediction.risk.suggestion }}</strong>
+        </div>
+        <div class="list-stack">
+            {% for factor in prediction.risk.factors %}
+            <div class="list-row">
+                <span>{{ factor }}</span>
+                <em>风险因子</em>
+            </div>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+
+<section class="dual-grid">
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow">Structure</p>
+                <h3>人口结构变化识别</h3>
+            </div>
+        </div>
+        <div class="list-stack">
+            <div class="list-row"><span>男性人口占比</span><strong>{{ prediction.structure.male_ratio_start }}% → {{ prediction.structure.male_ratio_latest }}%</strong><em>性别结构</em></div>
+            <div class="list-row"><span>老龄化率变化</span><strong>{{ prediction.structure.aging_delta }}%</strong><em>年龄结构</em></div>
+            <div class="list-row"><span>出生率变化</span><strong>{{ prediction.structure.birth_delta }}%</strong><em>自然增长</em></div>
+            <div class="list-row"><span>城镇化率变化</span><strong>{{ prediction.structure.urbanization_delta }}%</strong><em>空间结构</em></div>
+            {% for finding in prediction.structure.findings %}
+            <div class="list-row"><span>{{ finding }}</span><em>识别结论</em></div>
+            {% endfor %}
+        </div>
+    </article>
+
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow">LLM Explanation</p>
+                <h3>大模型结果解释分析</h3>
+            </div>
+            <span class="muted">{{ prediction.explanation.provider }}</span>
+        </div>
+        <p class="section-copy">{{ prediction.explanation.text }}</p>
+        <form method="post" class="inline-filter">
+            <input type="hidden" name="action" value="save_report">
+            <input type="hidden" name="region" value="{{ filters.region }}">
+            <input type="hidden" name="metric" value="{{ filters.metric }}">
+            <input type="hidden" name="forecast_years" value="{{ filters.forecast_years }}">
+            <label>
+                <span>报告标题</span>
+                <input type="text" name="title" value="{{ prediction.region }}人口趋势预测报告">
+            </label>
+            <div class="form-actions">
+                <button type="submit" class="primary-button">保存为分析报告</button>
+            </div>
+        </form>
+    </article>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/prediction.js') }}"></script>
+{% endblock %}

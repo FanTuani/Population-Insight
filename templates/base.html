@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}人口趋势与分析管理系统{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+    {% block head_extra %}{% endblock %}
+</head>
+<body class="{% if current_user %}app-layout{% else %}auth-page{% endif %}">
+    <div class="shell {% if current_user %}app-shell{% else %}auth-shell{% endif %}">
+        {% if current_user %}
+        <aside class="sidebar" data-sidebar>
+            <div class="sidebar-top">
+                <div class="brand-block sidebar-brand">
+                    <div class="brand-mark sidebar-mark">
+                        <span class="brand-mark-icon"></span>
+                    </div>
+                    <div class="brand-copy-wrap">
+                        <h1>人口趋势与分析管理系统</h1>
+                        <p>洞察人口变化，支撑科学决策</p>
+                    </div>
+                </div>
+                <button class="sidebar-collapse" type="button" data-sidebar-collapse aria-label="收起侧边栏"></button>
+            </div>
+
+            <div class="sidebar-scroll">
+                <nav class="nav sidebar-nav">
+                    <section class="nav-group nav-group-core {% if request.path in ['/', '/statistics', '/comparison', '/prediction', '/charts', '/alerts', '/reports'] %}is-open{% endif %}" data-nav-group>
+                        <button
+                            class="nav-group-toggle"
+                            type="button"
+                            data-nav-group-toggle
+                            aria-expanded="{% if request.path in ['/', '/statistics', '/comparison', '/prediction', '/charts', '/alerts', '/reports'] %}true{% else %}false{% endif %}">
+                            <span class="nav-section">核心分析</span>
+                            <i class="nav-group-arrow"></i>
+                        </button>
+                        <div class="nav-group-panel" data-nav-group-panel>
+                            <a href="{{ url_for('dashboard_view') }}" class="nav-link {% if request.path == '/' %}active{% endif %}" title="概览">
+                                <span class="nav-icon icon-dashboard"></span>
+                                <span class="nav-label">  概览</span>
+                                <i class="nav-arrow"></i>
+                            </a>
+                            <a href="{{ url_for('statistics_view') }}" class="nav-link {% if request.path == '/statistics' %}active{% endif %}" title="统计分析">
+                                <span class="nav-icon icon-chart"></span>
+                                <span class="nav-label">  统计分析</span>
+                                <i class="nav-arrow"></i>
+                            </a>
+                            <a href="{{ url_for('comparison_view') }}" class="nav-link {% if request.path == '/comparison' %}active{% endif %}" title="对比分析">
+                                <span class="nav-icon icon-compare"></span>
+                                <span class="nav-label">  对比分析</span>
+                                <i class="nav-arrow"></i>
+                            </a>
+                            <a href="{{ url_for('prediction_view') }}" class="nav-link {% if request.path == '/prediction' %}active{% endif %}" title="趋势预测">
+                                <span class="nav-icon icon-trend"></span>
+                                <span class="nav-label">  趋势预测</span>
+                                <i class="nav-arrow"></i>
+                            </a>
+                            <a href="{{ url_for('charts_view') }}" class="nav-link {% if request.path == '/charts' %}active{% endif %}" title="图表中心">
+                                <span class="nav-icon icon-grid"></span>
+                                <span class="nav-label">图表中心</span>
+                                <i class="nav-arrow"></i>
+                            </a>
+                            <a href="{{ url_for('alerts_view') }}" class="nav-link {% if request.path == '/alerts' %}active{% endif %}" title="预警分析">
+                                <span class="nav-icon icon-bell"></span>
+                                <span class="nav-label">预警分析</span>
+                                <i class="nav-arrow"></i>
+                            </a>
+                            <a href="{{ url_for('reports_view') }}" class="nav-link {% if request.path == '/reports' %}active{% endif %}" title="分析报告">
+                                <span class="nav-icon icon-report"></span>
+                                <span class="nav-label">分析报告</span>
+                                <i class="nav-arrow"></i>
+                            </a>
+                        </div>
+                    </section>
+
+                    {% if current_user.role == 'admin' %}
+                    <section class="nav-group nav-group-governance {% if request.path.startswith('/records') or request.path in ['/collection', '/regions', '/sources', '/indicators', '/indicator-values'] %}is-open{% endif %}" data-nav-group>
+                        <button
+                            class="nav-group-toggle"
+                            type="button"
+                            data-nav-group-toggle
+                            aria-expanded="{% if request.path.startswith('/records') or request.path in ['/collection', '/regions', '/sources', '/indicators', '/indicator-values'] %}true{% else %}false{% endif %}">
+                            <span class="nav-section">数据治理</span>
+                            <i class="nav-group-arrow"></i>
+                        </button>
+                        <div class="nav-group-panel" data-nav-group-panel>
+                            <a href="{{ url_for('records_view') }}" class="nav-link {% if request.path.startswith('/records') %}active{% endif %}" title="数据管理">
+                                <span class="nav-icon icon-data"></span>
+                                <span class="nav-label">数据管理</span>
+                                <i class="nav-arrow"></i>
+                            </a>
+                            <a href="{{ url_for('collection_view') }}" class="nav-link {% if request.path == '/collection' %}active{% endif %}" title="数据采集">
+                                <span class="nav-icon icon-collect"></span>
+                                <span class="nav-label">数据采集</span>
+                                <i class="nav-arrow"></i>
+                            </a>
+                            <a href="{{ url_for('regions_view') }}" class="nav-link {% if request.path == '/regions' %}active{% endif %}" title="地区档案">
+                                <span class="nav-icon icon-pin"></span>
+                                <span class="nav-label">地区档案</span>
+                                <i class="nav-arrow"></i>
+                            </a>
+                            <a href="{{ url_for('sources_view') }}" class="nav-link {% if request.path == '/sources' %}active{% endif %}" title="数据来源">
+                                <span class="nav-icon icon-source"></span>
+                                <span class="nav-label">数据来源</span>
+                                <i class="nav-arrow"></i>
+                            </a>
+                            <a href="{{ url_for('indicators_view') }}" class="nav-link {% if request.path in ['/indicators', '/indicator-values'] %}active{% endif %}" title="扩展指标">
+                                <span class="nav-icon icon-grid2"></span>
+                                <span class="nav-label">扩展指标</span>
+                                <i class="nav-arrow"></i>
+                            </a>
+                        </div>
+                    </section>
+
+                    <section class="nav-group nav-group-system {% if request.path == '/logs' %}is-open{% endif %}" data-nav-group>
+                        <button
+                            class="nav-group-toggle"
+                            type="button"
+                            data-nav-group-toggle
+                            aria-expanded="{% if request.path == '/logs' %}true{% else %}false{% endif %}">
+                            <span class="nav-section">系统管理</span>
+                            <i class="nav-group-arrow"></i>
+                        </button>
+                        <div class="nav-group-panel" data-nav-group-panel>
+                            <a href="{{ url_for('logs_view') }}" class="nav-link {% if request.path == '/logs' %}active{% endif %}" title="操作日志">
+                                <span class="nav-icon icon-log"></span>
+                                <span class="nav-label">操作日志</span>
+                                <i class="nav-arrow"></i>
+                            </a>
+                            <a href="#" class="nav-link is-disabled" title="系统设置（即将开放）" aria-disabled="true">
+                                <span class="nav-icon icon-settings"></span>
+                                <span class="nav-label">系统设置</span>
+                                <i class="nav-arrow"></i>
+                            </a>
+                            <a href="#" class="nav-link is-disabled" title="用户管理（即将开放）" aria-disabled="true">
+                                <span class="nav-icon icon-user"></span>
+                                <span class="nav-label">用户管理</span>
+                                <i class="nav-arrow"></i>
+                            </a>
+                            <a href="#" class="nav-link is-disabled" title="权限管理（即将开放）" aria-disabled="true">
+                                <span class="nav-icon icon-shield"></span>
+                                <span class="nav-label">权限管理</span>
+                                <i class="nav-arrow"></i>
+                            </a>
+                        </div>
+                    </section>
+                    {% endif %}
+                </nav>
+            </div>
+
+            <div class="sidebar-footer sidebar-user-card">
+                <div class="user-avatar"><span>{{ current_user.username[:1]|upper }}</span></div>
+                <div class="user-meta">
+                    <strong>{{ current_user.username }}</strong>
+                    <span class="role-badge">{{ '系统管理员' if current_user.role == 'admin' else '普通用户' }}</span>
+                </div>
+                <a href="{{ url_for('logout_view') }}" class="logout-link">退出登录</a>
+            </div>
+        </aside>
+        <div class="sidebar-backdrop" data-sidebar-backdrop hidden></div>
+        {% endif %}
+        <main class="main-panel {% if not current_user %}auth-layout{% endif %}">
+            {% if current_user %}
+            <header class="topbar">
+                <div class="topbar-title">
+                    <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-label="切换导航"></button>
+                    <div>
+                        <p class="eyebrow">Population Analysis</p>
+                        <h2>{% block page_title %}系统工作台{% endblock %}</h2>
+                    </div>
+                </div>
+                {% if data_health %}
+                <div class="status-line">
+                    <span class="status-pill">最新 {{ data_health.latest_year or '-' }}</span>
+                    <span class="status-pill">{{ data_health.region_count }} 地区</span>
+                    <span class="status-pill">{{ data_health.source_count }} 来源</span>
+                </div>
+                {% endif %}
+            </header>
+            {% endif %}
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <section class="flash-stack">
+                {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </section>
+            {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

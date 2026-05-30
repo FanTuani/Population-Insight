@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block page_title %}人口预警分析{% endblock %}
+
+{% block content %}
+<section class="metric-grid">
+    <article class="metric-card">
+        <span>预警总数</span>
+        <strong>{{ alerts|length }}</strong>
+    </article>
+    <article class="metric-card">
+        <span>高等级预警</span>
+        <strong>{{ alerts|selectattr('severity', 'equalto', '高')|list|length }}</strong>
+    </article>
+    <article class="metric-card">
+        <span>中等级预警</span>
+        <strong>{{ alerts|selectattr('severity', 'equalto', '中')|list|length }}</strong>
+    </article>
+    <article class="metric-card">
+        <span>预警规则</span>
+        <strong>3</strong>
+    </article>
+</section>
+
+<section class="panel">
+    <div class="panel-header spread">
+        <div>
+            <p class="eyebrow">Population Alerts</p>
+            <h3>预警明细</h3>
+        </div>
+        <span class="muted">老龄化率 >= 20%，自然增长率 < 0，出生率 < 7%</span>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>地区</th>
+                    <th>年份</th>
+                    <th>预警类型</th>
+                    <th>等级</th>
+                    <th>说明</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for alert in alerts %}
+                <tr>
+                    <td>{{ alert.region }}</td>
+                    <td>{{ alert.year }}</td>
+                    <td>{{ alert.alert_type }}</td>
+                    <td>{{ alert.severity }}</td>
+                    <td>{{ alert.message }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="empty-cell">暂无人口预警。</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

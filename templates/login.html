@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}登录 | 人口趋势与分析管理系统{% endblock %}
+
+{% block content %}
+<section class="auth-landing" aria-label="人口趋势与分析管理系统登录">
+    <div class="auth-hero">
+        <div class="auth-brand">
+            <div class="brand-mark">PI</div>
+            <div>
+                <span class="brand-kicker">Population Insight</span>
+                <h1>人口趋势与分析管理系统</h1>
+            </div>
+        </div>
+
+        <div class="auth-hero-copy">
+            <p class="eyebrow">Data Intelligence Platform</p>
+            <h2>更清晰地看见人口变化，更高效地支撑决策</h2>
+            <p>从数据采集、统计分析到预测预警，统一管理人口数据资产，帮助你快速发现趋势与风险。</p>
+        </div>
+
+        <div class="auth-highlights">
+            <article>
+                <strong>多维分析</strong>
+                <span>统计、对比、图表、预测一体化呈现</span>
+            </article>
+            <article>
+                <strong>治理闭环</strong>
+                <span>采集、校验、来源与日志管理更完整</span>
+            </article>
+            <article>
+                <strong>可视优先</strong>
+                <span>层次更清晰的面板布局与视觉引导</span>
+            </article>
+        </div>
+    </div>
+
+    <form method="post" class="auth-card">
+        <div class="login-card-icon"></div>
+        <h2>欢迎登录</h2>
+        <p class="auth-card-copy">请输入你的账号信息进入系统。</p>
+
+        <label class="input-shell">
+            <span>用户名</span>
+            <input type="text" name="username" placeholder="用户名" autocomplete="username" required>
+        </label>
+
+        <label class="input-shell password-shell">
+            <span>密码</span>
+            <input type="password" name="password" placeholder="密码" autocomplete="current-password" required data-password-input>
+            <button type="button" class="password-toggle" aria-label="显示密码" data-password-toggle></button>
+        </label>
+
+        <button type="submit" class="primary-button login-submit">进入系统</button>
+
+        <div class="login-card-foot">
+            <span>支持浏览与管理角色</span>
+            <span>响应式界面适配多终端</span>
+        </div>
+    </form>
+</section>
+{% endblock %}
