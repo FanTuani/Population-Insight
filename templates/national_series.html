@@ -46,7 +46,7 @@
             <form class="chart-form compact-form" data-national-trend-form data-endpoint="{{ url_for('national_series_trend_api') }}">
                 <label>
                     <span>指标</span>
-                    <select name="metric">
+                    <select name="metric" data-national-metric>
                         <option value="total_population">总人口</option>
                         <option value="birth_rate">出生率</option>
                         <option value="death_rate">死亡率</option>
@@ -57,7 +57,7 @@
             </form>
         </div>
         <div id="national-trend-chart" class="chart-surface" role="img" aria-label="全国人口长序列趋势图"></div>
-        <p class="source-note">说明：1950-1959 年来自国家统计局年鉴早期人口长序列整理；1960-2024 年使用 World Bank WDI 并交叉官方统计源；2025 年使用国家统计局统计公报。</p>
+        <p class="source-note">说明：1950-2024 年以国家统计局/中国统计年鉴公开年度数据为主；2025 年使用国家统计局统计公报。率类指标单位为 ‰，城镇化率单位为 %。</p>
     </article>
 
     <article class="panel">
@@ -88,7 +88,7 @@
         <form class="inline-filter mini-forecast-form" method="get">
             <label>
                 <span>预测年数</span>
-                <input type="number" name="forecast_years" min="1" max="10" value="{{ forecast_years }}">
+                <input type="number" name="forecast_years" min="1" max="10" value="{{ forecast_years or 5 }}">
             </label>
             <button class="secondary-button" type="submit">重新预测</button>
         </form>

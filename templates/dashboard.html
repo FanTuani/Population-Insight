@@ -30,7 +30,8 @@
     </article>
     <article class="metric-card">
         <span>年份范围</span>
-        <strong>{{ summary.min_year or '-' }} - {{ summary.max_year or '-' }}</strong>
+        <strong>{{ summary.national_summary.min_year or summary.min_year or '-' }} - {{ summary.national_summary.max_year or summary.max_year or '-' }}</strong>
+        <small>全国长序列；省级 {{ summary.min_year or '-' }} - {{ summary.max_year or '-' }}</small>
     </article>
     <article class="metric-card">
         <span>平均总人口</span>
@@ -231,6 +232,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/china_geo.js') }}"></script>
 <script src="{{ url_for('static', filename='js/dashboard_map.js') }}"></script>
 {% endblock %}

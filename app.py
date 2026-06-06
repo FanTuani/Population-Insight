@@ -512,7 +512,64 @@ def prediction_view():
 
     try:
         forecast_years = int(forecast_years_text)
-        prediction = build_population_prediction(region, metric, forecast_years)
+        if region == "全国":
+            if metric != "total_population":
+                raise ValueError("全国长序列预测目前仅支持总人口。")
+            national_prediction = build_national_population_prediction(forecast_years)
+            prediction = {
+                "region": "全国",
+                "metric": "total_population",
+                "metric_label": "总人口",
+                "history": national_prediction["history"],
+                "predictions": [
+                    {
+                        "year": item["year"],
+                        "linear_value": item["predicted_value"],
+                        "growth_fit_value": item["predicted_value"],
+                        "recent_trend_value": item["predicted_value"],
+                        "predicted_value": item["predicted_value"],
+                    }
+                    for item in national_prediction["predictions"]
+                ],
+                "model": {
+                    **national_prediction["model"],
+                    "compound_growth_rate": 0,
+                    "recent_growth_rate": 0,
+                },
+                "structure": {
+                    "male_ratio_start": 0,
+                    "male_ratio_latest": 0,
+                    "aging_delta": 0,
+                    "birth_delta": 0,
+                    "urbanization_delta": 0,
+                    "findings": ["全国预测基于 1950-2025 年总人口长序列。"],
+                },
+                "risk": {
+                    "score": 0,
+                    "level": "观察",
+                    "factors": ["全国长序列预测用于宏观趋势观察。"],
+                    "suggestion": "建议结合出生率、死亡率和自然增长率进行解释。",
+                },
+                "explanation": {
+                    "provider": "local-rule",
+                    "text": "全国预测使用 1950-2025 年总人口长序列进行线性拟合，适合答辩展示长期人口规模变化方向。",
+                },
+                "chart": {
+                    "title": "全国总人口历史趋势与预测",
+                    "xAxis": [item["year"] for item in national_prediction["history"]]
+                    + [item["year"] for item in national_prediction["predictions"]],
+                    "history": [item["value"] for item in national_prediction["history"]]
+                    + [None for _ in national_prediction["predictions"]],
+                    "prediction": [None for _ in national_prediction["history"][:-1]]
+                    + [national_prediction["history"][-1]["value"]]
+                    + [item["predicted_value"] for item in national_prediction["predictions"]],
+                    "metricLabel": "总人口",
+                    "axisUnit": "person",
+                    "splitYear": national_prediction["history"][-1]["year"],
+                },
+            }
+        else:
+            prediction = build_population_prediction(region, metric, forecast_years)
         if request.method == "POST" and _clean_text(request.form.get("action")) == "save_report":
             add_analysis_report(
                 {
@@ -751,6 +808,28 @@ def prediction_chart_api():
         region = _clean_text(request.args.get("region"))
         metric = _clean_text(request.args.get("metric")) or "total_population"
         forecast_years = int(_clean_text(request.args.get("forecast_years")) or "5")
+        if region == "全国":
+            if metric != "total_population":
+                raise ValueError("全国长序列预测目前仅支持总人口。")
+            national_prediction = build_national_population_prediction(forecast_years)
+            history_years = [item["year"] for item in national_prediction["history"]]
+            future_years = [item["year"] for item in national_prediction["predictions"]]
+            history_values = [item["value"] for item in national_prediction["history"]]
+            predicted_values = [item["predicted_value"] for item in national_prediction["predictions"]]
+            return jsonify(
+                {
+                    "success": True,
+                    "data": {
+                        "title": "全国总人口历史趋势与预测",
+                        "xAxis": history_years + future_years,
+                        "history": history_values + [None for _ in future_years],
+                        "prediction": [None for _ in history_years[:-1]] + [history_values[-1]] + predicted_values,
+                        "metricLabel": "总人口",
+                        "axisUnit": "person",
+                        "splitYear": history_years[-1],
+                    },
+                }
+            )
         prediction = build_population_prediction(region, metric, forecast_years)
         return jsonify({"success": True, "data": prediction["chart"]})
     except ValueError as error:

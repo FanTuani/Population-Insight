@@ -12,9 +12,9 @@
         </div>
     </div>
     <form method="get" class="inline-filter bi-inline-filter">
-        <label><span>地区</span><input type="text" name="region" value="{{ filters.region }}"></label>
-        <label><span>起始年份</span><input type="number" name="start_year" value="{{ filters.start_year }}"></label>
-        <label><span>结束年份</span><input type="number" name="end_year" value="{{ filters.end_year }}"></label>
+        <label><span>地区</span><input type="text" name="region" value="{{ filters.region }}" placeholder="如：上海市"></label>
+        <label><span>起始年份</span><input type="number" name="start_year" value="{{ filters.start_year or 2015 }}" placeholder="2015"></label>
+        <label><span>结束年份</span><input type="number" name="end_year" value="{{ filters.end_year or 2024 }}" placeholder="2024"></label>
         <div class="form-actions">
             <button type="submit" class="primary-button">更新统计</button>
         </div>

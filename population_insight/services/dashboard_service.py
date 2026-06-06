@@ -5,6 +5,7 @@ from population_insight.db.connection import fetch_all, fetch_one
 from population_insight.services.log_service import list_operation_logs
 from population_insight.services.national_series_service import get_national_series_summary
 from population_insight.services.national_series_service import list_national_metric_records
+from population_insight.services.national_series_service import NATIONAL_METRIC_UNITS
 from population_insight.services.population_service import (
     get_distinct_regions,
     get_distinct_years,
@@ -133,7 +134,8 @@ def get_chart_trend_data_with_mode(region: str, metric: str, mode: str = "relati
     if mode not in {"relative", "absolute"}:
         raise ValueError("不支持的趋势图展示方式。")
 
-    if region == "全国":
+    is_national = region == "全国"
+    if is_national:
         records = list_national_metric_records(metric=metric)
     else:
         records = [
@@ -159,7 +161,7 @@ def get_chart_trend_data_with_mode(region: str, metric: str, mode: str = "relati
     else:
         series = raw_series
         metric_label = METRIC_LABELS[metric]
-        axis_unit = _infer_axis_unit(metric)
+        axis_unit = _infer_axis_unit(metric, is_national=is_national)
         title_suffix = "趋势图"
 
     return {
@@ -170,7 +172,7 @@ def get_chart_trend_data_with_mode(region: str, metric: str, mode: str = "relati
         "metricLabel": metric_label,
         "rawMetricLabel": METRIC_LABELS[metric],
         "axisUnit": axis_unit,
-        "rawAxisUnit": _infer_axis_unit(metric),
+        "rawAxisUnit": _infer_axis_unit(metric, is_national=is_national),
         "mode": mode,
         "baseValue": base_value,
     }
@@ -217,7 +219,9 @@ def get_chart_gender_data(region: str, year: int) -> dict:
     }
 
 
-def _infer_axis_unit(metric: str) -> str:
+def _infer_axis_unit(metric: str, is_national: bool = False) -> str:
+    if is_national:
+        return NATIONAL_METRIC_UNITS.get(metric, "")
     if metric in {"total_population", "male_population", "female_population"}:
         return "person"
     if metric in {"birth_rate", "death_rate", "natural_growth_rate", "aging_rate", "urbanization_rate"}:

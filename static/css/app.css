@@ -314,7 +314,7 @@ body.sidebar-collapsed .sidebar-collapse::after {
 .main-panel { min-width: 0; padding: 24px 28px 40px; }
 .app-shell .main-panel { height: 100vh; overflow-y: auto; overscroll-behavior: contain; }
 .topbar {
-    position: sticky; top: 0; z-index: 5;
+    position: relative; top: auto; z-index: 5;
     display: flex; justify-content: space-between; align-items: center; gap: 16px;
     margin: -24px -28px 24px; padding: 18px 28px;
     background: rgba(248, 251, 255, 0.82); backdrop-filter: blur(16px);
@@ -1135,5 +1135,117 @@ textarea:focus {
     .help-dot:focus::after {
         left: 0;
         transform: none;
+    }
+}
+
+/* Final layout hardening for long Chinese labels and dense dashboard controls. */
+.topbar {
+    position: relative;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    overflow: visible;
+    min-height: 78px;
+}
+
+.topbar-title {
+    flex: 1 1 360px;
+    min-width: 0;
+    align-items: flex-start;
+}
+
+.topbar-title > div {
+    min-width: 0;
+}
+
+.topbar-title h2 {
+    display: block;
+    width: 100%;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.25;
+    word-break: keep-all;
+}
+
+.status-line {
+    flex: 0 1 520px;
+    min-width: 260px;
+    align-items: center;
+}
+
+.chart-form label {
+    flex: 1 1 220px;
+}
+
+.chart-form select,
+.inline-filter select,
+.filter-grid select,
+.form-grid select {
+    min-width: 0;
+    white-space: normal;
+    text-overflow: clip;
+}
+
+.chart-surface,
+#china-map,
+#national-trend-chart,
+#prediction-chart,
+#trend-chart,
+#bar-chart,
+#gender-chart {
+    min-height: 440px;
+}
+
+#china-map {
+    height: clamp(440px, 54vh, 620px);
+}
+
+.map-toolbar {
+    grid-template-columns: minmax(180px, 1fr) minmax(118px, 150px);
+}
+
+.map-detail strong,
+.map-detail span,
+.list-row span,
+.list-row strong,
+td,
+th {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.region-checks {
+    overflow-y: auto;
+    max-height: 280px;
+}
+
+.check-option,
+.region-checks label {
+    white-space: normal;
+}
+
+@media (max-width: 760px) {
+    .topbar {
+        min-height: 0;
+    }
+
+    .topbar-title,
+    .status-line {
+        flex-basis: 100%;
+        min-width: 0;
+    }
+
+    .chart-surface,
+    #china-map,
+    #national-trend-chart,
+    #prediction-chart,
+    #trend-chart,
+    #bar-chart,
+    #gender-chart {
+        min-height: 360px;
+    }
+
+    .map-toolbar {
+        grid-template-columns: minmax(0, 1fr);
     }
 }

@@ -364,12 +364,12 @@ def build_national_population_prediction(forecast_years: int = 5) -> dict[str, A
     if len(records) < 3:
         raise ValueError("全国长序列数据不足，无法预测。")
     forecast_years = max(1, min(int(forecast_years), 10))
-    recent_records = records[-8:]
-    model_records = records[-5:]
+    history_records = records
+    model_records = records
     years = [item["year"] for item in model_records]
     values = [float(item["total_population"]) for item in model_records]
     linear = _linear_regression(years, values)
-    latest_year = recent_records[-1]["year"]
+    latest_year = history_records[-1]["year"]
     future_years = list(range(latest_year + 1, latest_year + forecast_years + 1))
     predictions = []
     for year in future_years:
@@ -377,10 +377,10 @@ def build_national_population_prediction(forecast_years: int = 5) -> dict[str, A
         predictions.append({"year": year, "predicted_value": int(round(predicted))})
 
     return {
-        "history": [{"year": item["year"], "value": item["total_population"]} for item in recent_records],
+        "history": [{"year": item["year"], "value": item["total_population"]} for item in history_records],
         "predictions": predictions,
         "model": {
-            "name": "近5年线性趋势",
+            "name": "1950-2025 线性趋势",
             "r2": linear["r2"],
             "slope": linear["slope"],
         },
