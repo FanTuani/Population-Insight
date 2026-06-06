@@ -503,7 +503,7 @@ def national_series_view():
 @login_required
 def prediction_view():
     context = _base_context()
-    default_region = context["region_options"][0] if context["region_options"] else ""
+    default_region = "全国" if "全国" in context["region_options"] else (context["region_options"][0] if context["region_options"] else "")
     region = _clean_text(request.values.get("region")) or default_region
     metric = _clean_text(request.values.get("metric")) or "total_population"
     forecast_years_text = _clean_text(request.values.get("forecast_years")) or "5"
@@ -805,7 +805,7 @@ def chart_gender_api():
 @login_required
 def prediction_chart_api():
     try:
-        region = _clean_text(request.args.get("region"))
+        region = _clean_text(request.args.get("region")) or "全国"
         metric = _clean_text(request.args.get("metric")) or "total_population"
         forecast_years = int(_clean_text(request.args.get("forecast_years")) or "5")
         if region == "全国":

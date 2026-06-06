@@ -605,6 +605,375 @@ tbody tr:last-child td { border-bottom: 0; }
     }
 }
 
+/* Sidebar icon refresh */
+.nav-icon::before,
+.nav-icon::after {
+    box-sizing: border-box;
+}
+
+.icon-dashboard::before {
+    inset: 2px;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    background: transparent;
+    -webkit-mask: none;
+    mask: none;
+}
+
+.icon-dashboard::after {
+    left: 8px;
+    top: 5px;
+    width: 2px;
+    height: 8px;
+    border-radius: 999px;
+    background: currentColor;
+    transform: rotate(42deg);
+    transform-origin: bottom center;
+}
+
+.icon-chart::before {
+    left: 2px;
+    bottom: 2px;
+    width: 3px;
+    height: 8px;
+    border: 0;
+    border-radius: 1px;
+    background: currentColor;
+    box-shadow: 6px -5px 0 0 currentColor, 12px -2px 0 0 currentColor;
+}
+
+.icon-chart::after {
+    left: 1px;
+    bottom: 1px;
+    width: 17px;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.35;
+}
+
+.icon-compare::before {
+    left: 2px;
+    top: 4px;
+    width: 14px;
+    height: 10px;
+    border: 2px solid currentColor;
+    border-radius: 2px;
+    background: transparent;
+    box-shadow: none;
+}
+
+.icon-compare::after {
+    left: 8px;
+    top: 2px;
+    width: 2px;
+    height: 14px;
+    border: 0;
+    background: currentColor;
+    opacity: 0.9;
+    box-shadow: none;
+}
+
+.icon-trend::before {
+    left: 3px;
+    top: 11px;
+    width: 12px;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+    transform: rotate(-32deg);
+    transform-origin: left center;
+}
+
+.icon-trend::after {
+    right: 2px;
+    top: 4px;
+    width: 6px;
+    height: 6px;
+    border-top: 2px solid currentColor;
+    border-right: 2px solid currentColor;
+    transform: rotate(45deg);
+}
+
+.icon-national::before {
+    inset: 2px;
+    width: auto;
+    height: auto;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+}
+
+.icon-national::after {
+    left: 4px;
+    top: 8px;
+    width: 10px;
+    height: 2px;
+    background: currentColor;
+    box-shadow: 0 -4px 0 -0.8px currentColor, 0 4px 0 -0.8px currentColor;
+}
+
+.icon-grid::before {
+    inset: 2px;
+    border: 2px solid currentColor;
+    border-radius: 3px;
+}
+
+.icon-grid::after {
+    left: 8px;
+    top: 3px;
+    width: 2px;
+    height: 12px;
+    background: currentColor;
+    box-shadow: -5px 5px 0 -0.6px currentColor, 5px -5px 0 -0.6px currentColor;
+}
+
+.icon-bell::before {
+    left: 4px;
+    top: 3px;
+    width: 10px;
+    height: 10px;
+    border: 2px solid currentColor;
+    border-bottom: 0;
+    border-radius: 8px 8px 3px 3px;
+}
+
+.icon-bell::after {
+    left: 5px;
+    bottom: 2px;
+    width: 8px;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+    box-shadow: 3px 3px 0 -1px currentColor;
+}
+
+.icon-report::before,
+.icon-data::before,
+.icon-log::before {
+    left: 4px;
+    top: 2px;
+    width: 11px;
+    height: 14px;
+    border: 2px solid currentColor;
+    border-radius: 3px;
+    background: transparent;
+}
+
+.icon-report::after,
+.icon-log::after {
+    left: 7px;
+    top: 7px;
+    width: 5px;
+    height: 2px;
+    background: currentColor;
+    box-shadow: 0 4px 0 0 currentColor;
+}
+
+.icon-data::after {
+    left: 6px;
+    top: 6px;
+    width: 7px;
+    height: 2px;
+    background: currentColor;
+    box-shadow: 0 4px 0 0 currentColor;
+}
+
+.icon-collect::before {
+    left: 4px;
+    top: 3px;
+    width: 11px;
+    height: 12px;
+    border: 2px solid currentColor;
+    border-radius: 3px;
+}
+
+.icon-collect::after {
+    left: 8px;
+    top: 1px;
+    width: 2px;
+    height: 9px;
+    background: currentColor;
+    box-shadow: -3px 5px 0 -0.2px currentColor, 3px 5px 0 -0.2px currentColor;
+}
+
+.icon-pin::before {
+    left: 4px;
+    top: 2px;
+    width: 10px;
+    height: 12px;
+    border: 2px solid currentColor;
+    border-radius: 8px 8px 8px 2px;
+    transform: rotate(-45deg);
+}
+
+.icon-pin::after {
+    left: 8px;
+    top: 6px;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.icon-source::before {
+    left: 2px;
+    top: 5px;
+    width: 7px;
+    height: 7px;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    box-shadow: 9px 0 0 -2px currentColor;
+}
+
+.icon-source::after {
+    left: 8px;
+    top: 8px;
+    width: 8px;
+    height: 2px;
+    background: currentColor;
+}
+
+.icon-grid2::before {
+    left: 3px;
+    top: 3px;
+    width: 5px;
+    height: 5px;
+    border: 2px solid currentColor;
+    border-radius: 2px;
+    box-shadow: 8px 0 0 -0.2px currentColor, 0 8px 0 -0.2px currentColor, 8px 8px 0 -0.2px currentColor;
+}
+
+.icon-grid2::after {
+    display: none;
+}
+
+.icon-settings::before {
+    inset: 3px;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+}
+
+.icon-settings::after {
+    left: 8px;
+    top: 1px;
+    width: 2px;
+    height: 16px;
+    border-radius: 999px;
+    background: currentColor;
+    box-shadow: -7px 7px 0 -0.2px currentColor, 7px 7px 0 -0.2px currentColor;
+    transform: rotate(45deg);
+}
+
+.icon-user::before {
+    left: 6px;
+    top: 3px;
+    width: 7px;
+    height: 7px;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+}
+
+.icon-user::after {
+    left: 3px;
+    bottom: 2px;
+    width: 13px;
+    height: 7px;
+    border: 2px solid currentColor;
+    border-radius: 8px 8px 3px 3px;
+}
+
+.icon-shield::before {
+    left: 4px;
+    top: 2px;
+    width: 11px;
+    height: 14px;
+    border: 2px solid currentColor;
+    border-radius: 7px 7px 9px 9px;
+    clip-path: polygon(50% 0, 100% 18%, 88% 78%, 50% 100%, 12% 78%, 0 18%);
+}
+
+.icon-shield::after {
+    left: 8px;
+    top: 6px;
+    width: 5px;
+    height: 8px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(35deg);
+}
+
+/* Sidebar polish v3: tighter rhythm and clearer hierarchy. */
+:root {
+    --sidebar-width: 272px;
+    --sidebar-collapsed-width: 74px;
+    --sidebar-accent: #11606f;
+    --sidebar-accent-soft: #dceff2;
+}
+
+.sidebar {
+    padding: 14px 12px;
+    background: linear-gradient(180deg, #fbfdfe 0%, #f5f9fa 100%);
+}
+
+.sidebar-top {
+    min-height: 68px;
+    padding: 9px;
+    border-radius: 11px;
+}
+
+.brand-copy-wrap h1,
+.brand-block h1 {
+    font-size: 16px;
+    letter-spacing: 0;
+}
+
+.brand-copy-wrap p {
+    margin-top: 6px;
+    font-size: 12px;
+}
+
+.sidebar-collapse {
+    margin-left: 2px;
+}
+
+.nav {
+    gap: 9px;
+}
+
+.nav-group + .nav-group {
+    padding-top: 9px;
+}
+
+.nav-group-toggle {
+    min-height: 28px;
+    padding: 0 8px;
+}
+
+.nav-section {
+    color: #526b77;
+}
+
+.nav-link {
+    min-height: 39px;
+    border-radius: 8px;
+}
+
+.nav-link.active {
+    background: linear-gradient(90deg, #d9edf1 0%, #e8f5f7 100%);
+}
+
+.sidebar-footer {
+    padding: 10px;
+    border-radius: 11px;
+}
+
+.role-badge {
+    max-width: 176px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 @media (max-width: 640px) {
     .main-panel, .auth-layout { padding: 14px; }
     .topbar { margin: -14px -14px 16px; padding: 14px; }
