@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_metric_help.html" as mh %}
 
 {% block page_title %}全国长序列{% endblock %}
 
@@ -25,7 +26,7 @@
         <strong>{{ summary.total_years }}</strong>
     </article>
     <article class="metric-card">
-        <span>最新总人口</span>
+        <span>最新总人口 {{ mh.help('total_population') }}</span>
         <strong>{{ "{:,.0f}".format(summary.latest.total_population / 10000) if summary.latest else '-' }}</strong>
         <small>万人</small>
     </article>
@@ -45,7 +46,7 @@
             </div>
             <form class="chart-form compact-form" data-national-trend-form data-endpoint="{{ url_for('national_series_trend_api') }}">
                 <label>
-                    <span>指标</span>
+                    <span>指标 {{ mh.help('metric') }}</span>
                     <select name="metric" data-national-metric>
                         <option value="total_population">总人口</option>
                         <option value="birth_rate">出生率</option>
@@ -108,12 +109,12 @@
             <thead>
                 <tr>
                     <th>年份</th>
-                    <th>总人口</th>
-                    <th>出生率(‰)</th>
-                    <th>死亡率(‰)</th>
-                    <th>自然增长率(‰)</th>
+                    <th>总人口 {{ mh.help('total_population') }}</th>
+                    <th>出生率(‰) {{ mh.help('birth_rate') }}</th>
+                    <th>死亡率(‰) {{ mh.help('death_rate') }}</th>
+                    <th>自然增长率(‰) {{ mh.help('natural_growth_rate') }}</th>
                     <th>城镇人口</th>
-                    <th>城镇化率</th>
+                    <th>城镇化率 {{ mh.help('urbanization_rate') }}</th>
                     <th>来源</th>
                 </tr>
             </thead>

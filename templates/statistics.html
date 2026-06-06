@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_metric_help.html" as mh %}
 
 {% block page_title %}统计分析{% endblock %}
 
@@ -32,15 +33,15 @@
         <strong>{{ statistics.record_count }}</strong>
     </article>
     <article class="metric-card">
-        <span>平均总人口</span>
+        <span>平均总人口 {{ mh.help('total_population') }}</span>
         <strong>{{ "{:,.0f}".format(statistics.avg_total_population) }}</strong>
     </article>
     <article class="metric-card">
-        <span>平均出生率</span>
+        <span>平均出生率 {{ mh.help('birth_rate') }}</span>
         <strong>{{ "%.2f"|format(statistics.avg_birth_rate) }}</strong>
     </article>
     <article class="metric-card">
-        <span>平均老龄化率</span>
+        <span>平均老龄化率 {{ mh.help('aging_rate') }}</span>
         <strong>{{ "%.2f"|format(statistics.avg_aging_rate) }}</strong>
     </article>
 </section>

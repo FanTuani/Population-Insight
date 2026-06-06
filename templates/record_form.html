@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_metric_help.html" as mh %}
 
 {% block page_title %}{{ '新增人口记录' if mode == 'create' else '编辑人口记录' }}{% endblock %}
 
@@ -17,13 +18,13 @@
             {% for region in region_options %}<option value="{{ region }}">{% endfor %}
         </datalist>
         <label><span>年份</span><input type="number" name="year" value="{{ form_data.get('year', '') or 2024 }}" required></label>
-        <label><span>总人口 <button type="button" class="help-dot" data-tip="单位为人，系统会校验男女合计应等于总人口。">?</button></span><input type="number" name="total_population" value="{{ form_data.get('total_population', '') or 10000000 }}" required></label>
-        <label><span>男性人口</span><input type="number" name="male_population" value="{{ form_data.get('male_population', '') or 5100000 }}" required></label>
-        <label><span>女性人口</span><input type="number" name="female_population" value="{{ form_data.get('female_population', '') or 4900000 }}" required></label>
-        <label><span>出生率 <button type="button" class="help-dot" data-tip="年度出生人口与平均人口之比，按本系统口径录入数值。">?</button></span><input type="number" step="0.01" name="birth_rate" value="{{ form_data.get('birth_rate', '') or 6.50 }}" required></label>
-        <label><span>死亡率</span><input type="number" step="0.01" name="death_rate" value="{{ form_data.get('death_rate', '') or 7.00 }}" required></label>
-        <label><span>老龄化率 <button type="button" class="help-dot" data-tip="老龄化率口径由下方“老龄化口径”选择。">?</button></span><input type="number" step="0.01" name="aging_rate" value="{{ form_data.get('aging_rate', '') or 18.00 }}" required></label>
-        <label><span>城镇化率</span><input type="number" step="0.01" name="urbanization_rate" value="{{ form_data.get('urbanization_rate', '') or 65.00 }}" required></label>
+        <label><span>总人口 {{ mh.help('total_population') }}</span><input type="number" name="total_population" value="{{ form_data.get('total_population', '') or 10000000 }}" required></label>
+        <label><span>男性人口 {{ mh.help('male_population') }}</span><input type="number" name="male_population" value="{{ form_data.get('male_population', '') or 5100000 }}" required></label>
+        <label><span>女性人口 {{ mh.help('female_population') }}</span><input type="number" name="female_population" value="{{ form_data.get('female_population', '') or 4900000 }}" required></label>
+        <label><span>出生率 {{ mh.help('birth_rate') }}</span><input type="number" step="0.01" name="birth_rate" value="{{ form_data.get('birth_rate', '') or 6.50 }}" required></label>
+        <label><span>死亡率 {{ mh.help('death_rate') }}</span><input type="number" step="0.01" name="death_rate" value="{{ form_data.get('death_rate', '') or 7.00 }}" required></label>
+        <label><span>老龄化率 {{ mh.help('aging_rate') }}</span><input type="number" step="0.01" name="aging_rate" value="{{ form_data.get('aging_rate', '') or 18.00 }}" required></label>
+        <label><span>城镇化率 {{ mh.help('urbanization_rate') }}</span><input type="number" step="0.01" name="urbanization_rate" value="{{ form_data.get('urbanization_rate', '') or 65.00 }}" required></label>
         <label>
             <span>老龄化口径</span>
             <select name="aging_rate_basis">

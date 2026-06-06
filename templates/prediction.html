@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_metric_help.html" as mh %}
 
 {% block page_title %}人口趋势预测{% endblock %}
 
@@ -24,7 +25,7 @@
             </select>
         </label>
         <label>
-            <span>预测指标</span>
+            <span>预测指标 {{ mh.help('metric') }}</span>
             <select name="metric">
                 {% for metric, label in metric_options.items() %}
                 <option value="{{ metric }}" {% if filters.metric == metric %}selected{% endif %}>{{ label }}</option>
@@ -144,10 +145,10 @@
             </div>
         </div>
         <div class="list-stack">
-            <div class="list-row"><span>男性人口占比</span><strong>{{ prediction.structure.male_ratio_start }}% → {{ prediction.structure.male_ratio_latest }}%</strong><em>性别结构</em></div>
-            <div class="list-row"><span>老龄化率变化</span><strong>{{ prediction.structure.aging_delta }}%</strong><em>年龄结构</em></div>
-            <div class="list-row"><span>出生率变化</span><strong>{{ prediction.structure.birth_delta }}%</strong><em>自然增长</em></div>
-            <div class="list-row"><span>城镇化率变化</span><strong>{{ prediction.structure.urbanization_delta }}%</strong><em>空间结构</em></div>
+            <div class="list-row"><span>男性人口占比 {{ mh.help('male_population') }}</span><strong>{{ prediction.structure.male_ratio_start }}% → {{ prediction.structure.male_ratio_latest }}%</strong><em>性别结构</em></div>
+            <div class="list-row"><span>老龄化率变化 {{ mh.help('aging_rate') }}</span><strong>{{ prediction.structure.aging_delta }}%</strong><em>年龄结构</em></div>
+            <div class="list-row"><span>出生率变化 {{ mh.help('birth_rate') }}</span><strong>{{ prediction.structure.birth_delta }}%</strong><em>自然增长</em></div>
+            <div class="list-row"><span>城镇化率变化 {{ mh.help('urbanization_rate') }}</span><strong>{{ prediction.structure.urbanization_delta }}%</strong><em>空间结构</em></div>
             {% for finding in prediction.structure.findings %}
             <div class="list-row"><span>{{ finding }}</span><em>识别结论</em></div>
             {% endfor %}

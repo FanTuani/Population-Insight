@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_metric_help.html" as mh %}
 
 {% block page_title %}图表中心{% endblock %}
 
@@ -32,7 +33,7 @@
                 </select>
             </label>
             <label>
-                <span>指标 <button type="button" class="help-dot" data-tip="人口规模、出生率、死亡率、自然增长率、老龄化率、城镇化率等统计指标。">?</button></span>
+                <span>指标 {{ mh.help('metric') }}</span>
                 <select name="metric">
                     {% for metric, label in metric_options.items() %}
                     <option value="{{ metric }}" {% if metric == 'total_population' %}selected{% endif %}>{{ label }}</option>
@@ -40,7 +41,7 @@
                 </select>
             </label>
             <label>
-                <span>显示方式 <button type="button" class="help-dot" data-tip="相对变化以首年为基期，实际值展示原始统计量。">?</button></span>
+                <span>显示方式 {{ mh.help('relative_mode') }}</span>
                 <select name="mode">
                     <option value="relative" selected>相对变化（推荐）</option>
                     <option value="absolute">实际值</option>
@@ -66,7 +67,7 @@
                 </select>
             </label>
             <label>
-                <span>指标</span>
+                <span>指标 {{ mh.help('metric') }}</span>
                 <select name="metric">
                     {% for metric, label in metric_options.items() %}
                     <option value="{{ metric }}" {% if metric == 'total_population' %}selected{% endif %}>{{ label }}</option>
@@ -74,7 +75,7 @@
                 </select>
             </label>
             <label>
-                <span>排序字段</span>
+                <span>排序字段 {{ mh.help('ranking') }}</span>
                 <select name="sort_by">
                     <option value="value" selected>按数值</option>
                     <option value="name">按地区首字母</option>

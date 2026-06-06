@@ -962,6 +962,24 @@ textarea:focus {
     flex: 0 0 auto;
 }
 
+th .help-dot,
+td .help-dot,
+.metric-card .help-dot,
+.list-row .help-dot,
+.feature-label .help-dot,
+h3 .help-dot,
+strong .help-dot {
+    width: 17px;
+    height: 17px;
+    margin-left: 3px;
+    font-size: 11px;
+    transform: translateY(-1px);
+}
+
+th .help-dot {
+    vertical-align: text-top;
+}
+
 .help-dot:hover::after,
 .help-dot:focus::after {
     content: attr(data-tip);
@@ -969,7 +987,7 @@ textarea:focus {
     left: 50%;
     bottom: calc(100% + 8px);
     z-index: 50;
-    width: min(280px, 70vw);
+    width: min(320px, 72vw);
     transform: translateX(-50%);
     padding: 10px 12px;
     border-radius: 8px;
@@ -979,6 +997,9 @@ textarea:focus {
     line-height: 1.5;
     text-align: left;
     box-shadow: 0 12px 28px rgba(16, 37, 51, 0.18);
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: break-word;
 }
 
 .region-checks {

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_metric_help.html" as mh %}
 
 {% block page_title %}数据对比分析{% endblock %}
 
@@ -16,7 +17,7 @@
     </div>
     <form method="get" class="form-grid" id="comparison-filter" data-endpoint="{{ url_for('comparison_api') }}">
         <label>
-            <span>对比指标 <button type="button" class="help-dot" data-tip="选择全国时使用 1950-2025 全国长序列；省级地区仍使用 2015-2024 年度表。">?</button></span>
+            <span>对比指标 {{ mh.help('metric') }} <button type="button" class="help-dot" data-tip="选择全国时使用 1950-2025 全国长序列；省级地区仍使用 2015-2024 年度表。">?</button></span>
             <select name="metric">
                 {% for metric, label in metric_options.items() %}
                 <option value="{{ metric }}" {% if filters.metric == metric %}selected{% endif %}>{{ label }}</option>

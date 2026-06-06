@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_metric_help.html" as mh %}
 
 {% block page_title %}人口数据采集{% endblock %}
 
@@ -78,13 +79,13 @@
                 <tr>
                     <th>地区</th>
                     <th>年份</th>
-                    <th>总人口</th>
-                    <th>男性人口</th>
-                    <th>女性人口</th>
-                    <th>出生率</th>
-                    <th>死亡率</th>
-                    <th>老龄化率</th>
-                    <th>城镇化率</th>
+                    <th>总人口 {{ mh.help('total_population') }}</th>
+                    <th>男性人口 {{ mh.help('male_population') }}</th>
+                    <th>女性人口 {{ mh.help('female_population') }}</th>
+                    <th>出生率 {{ mh.help('birth_rate') }}</th>
+                    <th>死亡率 {{ mh.help('death_rate') }}</th>
+                    <th>老龄化率 {{ mh.help('aging_rate') }}</th>
+                    <th>城镇化率 {{ mh.help('urbanization_rate') }}</th>
                     <th>备注</th>
                 </tr>
             </thead>

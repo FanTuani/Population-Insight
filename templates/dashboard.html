@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_metric_help.html" as mh %}
 
 {% block page_title %}概览仪表盘{% endblock %}
 
@@ -34,7 +35,7 @@
         <small>全国长序列；省级 {{ summary.min_year or '-' }} - {{ summary.max_year or '-' }}</small>
     </article>
     <article class="metric-card">
-        <span>平均总人口</span>
+        <span>平均总人口 {{ mh.help('total_population') }}</span>
         <strong>{{ "{:,.0f}".format(summary.avg_population) if summary.avg_population else '-' }}</strong>
     </article>
 </section>
@@ -102,7 +103,7 @@
                 <span>6 个地区高于均值 1.2 个百分点</span>
             </div>
             <div class="alert-card warning-card">
-                <strong>出生率波动</strong>
+                <strong>出生率波动 {{ mh.help('birth_rate') }}</strong>
                 <span>近 3 年连续回落，建议重点观察</span>
             </div>
             <div class="alert-card info-card">
@@ -127,7 +128,7 @@
         </div>
         {% if summary.top_region %}
         <div class="feature-data">
-            <p class="feature-label">最高总人口地区</p>
+            <p class="feature-label">最高总人口地区 {{ mh.help('total_population') }}</p>
             <h4>{{ summary.top_region.region }}</h4>
             <p>{{ summary.top_region.year }} 年总人口 {{ "{:,}".format(summary.top_region.total_population) }}</p>
         </div>
@@ -193,7 +194,7 @@
         <div class="panel-header">
             <div>
                 <p class="eyebrow">Aging Watch</p>
-                <h3>老龄化率较高地区</h3>
+                <h3>老龄化率较高地区 {{ mh.help('aging_rate') }}</h3>
             </div>
         </div>
         <div class="list-stack bi-ranking">
