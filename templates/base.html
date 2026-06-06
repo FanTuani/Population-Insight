@@ -18,8 +18,8 @@
                         <span class="brand-mark-icon"></span>
                     </div>
                     <div class="brand-copy-wrap">
-                        <h1>人口趋势与分析管理系统</h1>
-                        <p>洞察人口变化，支撑科学决策</p>
+                        <h1>Population Insight</h1>
+                        <p>人口趋势与分析管理系统</p>
                     </div>
                 </div>
                 <button class="sidebar-collapse" type="button" data-sidebar-collapse aria-label="收起侧边栏"></button>
@@ -39,22 +39,22 @@
                         <div class="nav-group-panel" data-nav-group-panel>
                             <a href="{{ url_for('dashboard_view') }}" class="nav-link {% if request.path == '/' %}active{% endif %}" title="概览">
                                 <span class="nav-icon icon-dashboard"></span>
-                                <span class="nav-label">  概览</span>
+                                <span class="nav-label">概览</span>
                                 <i class="nav-arrow"></i>
                             </a>
                             <a href="{{ url_for('statistics_view') }}" class="nav-link {% if request.path == '/statistics' %}active{% endif %}" title="统计分析">
                                 <span class="nav-icon icon-chart"></span>
-                                <span class="nav-label">  统计分析</span>
+                                <span class="nav-label">统计分析</span>
                                 <i class="nav-arrow"></i>
                             </a>
                             <a href="{{ url_for('comparison_view') }}" class="nav-link {% if request.path == '/comparison' %}active{% endif %}" title="对比分析">
                                 <span class="nav-icon icon-compare"></span>
-                                <span class="nav-label">  对比分析</span>
+                                <span class="nav-label">对比分析</span>
                                 <i class="nav-arrow"></i>
                             </a>
                             <a href="{{ url_for('prediction_view') }}" class="nav-link {% if request.path == '/prediction' %}active{% endif %}" title="趋势预测">
                                 <span class="nav-icon icon-trend"></span>
-                                <span class="nav-label">  趋势预测</span>
+                                <span class="nav-label">趋势预测</span>
                                 <i class="nav-arrow"></i>
                             </a>
                             <a href="{{ url_for('national_series_view') }}" class="nav-link {% if request.path == '/national-series' %}active{% endif %}" title="全国长序列">
