@@ -2,6 +2,10 @@
 
 {% block page_title %}概览仪表盘{% endblock %}
 
+{% block head_extra %}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+{% endblock %}
+
 {% block content %}
 <section class="hero-strip bi-hero">
     <div>
@@ -11,7 +15,7 @@
     </div>
     <div class="hero-actions">
         <a href="{{ url_for('records_view') }}" class="primary-button">进入数据管理</a>
-        <a href="{{ url_for('charts_view') }}" class="secondary-button">查看趋势图表</a>
+        <a href="{{ url_for('national_series_view') }}" class="secondary-button">查看全国长序列</a>
     </div>
 </section>
 
@@ -34,7 +38,7 @@
     </article>
 </section>
 
-<section class="insight-strip">
+<section class="insight-strip insight-strip-4">
     <article>
         <span>最新年度记录</span>
         <strong>{{ summary.health.latest_year_records }}</strong>
@@ -50,6 +54,11 @@
         <strong>{{ summary.health.source_count }}</strong>
         <small>统计公报与年鉴</small>
     </article>
+    <article>
+        <span>全国长序列</span>
+        <strong>{{ summary.national_summary.total_years }}</strong>
+        <small>{{ summary.national_summary.min_year or '-' }} - {{ summary.national_summary.max_year or '-' }} 年</small>
+    </article>
 </section>
 
 <section class="bi-grid bi-grid-2 bi-map-row">
@@ -60,16 +69,23 @@
                 <h3>人口地图与区域热力</h3>
             </div>
         </div>
-        <div class="bi-map">
-            <div class="bi-map-grid"></div>
-            <div class="bi-map-glow bi-map-glow-a"></div>
-            <div class="bi-map-glow bi-map-glow-b"></div>
-            <div class="bi-map-grid-label bi-map-label-north">华北高密度带</div>
-            <div class="bi-map-grid-label bi-map-label-east">沿海增长带</div>
-            <div class="bi-map-grid-label bi-map-label-south">南部活跃带</div>
-            <div class="bi-map-pin pin-a">京津冀</div>
-            <div class="bi-map-pin pin-b">长三角</div>
-            <div class="bi-map-pin pin-c">珠三角</div>
+        <div class="map-toolbar">
+            <select data-map-metric>
+                <option value="total_population">总人口</option>
+                <option value="birth_rate">出生率</option>
+                <option value="aging_rate">老龄化率</option>
+                <option value="urbanization_rate">城镇化率</option>
+            </select>
+            <select data-map-year>
+                {% for year in summary.years %}
+                <option value="{{ year }}" {% if year == summary.latest_year %}selected{% endif %}>{{ year }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div id="china-map" class="bi-map" data-endpoint="{{ url_for('dashboard_map_api') }}"></div>
+        <div class="map-detail" data-map-detail>
+            <strong>选择省份查看详情</strong>
+            <span>悬停或点击地图区域，高亮省份并显示相应人口指标。</span>
         </div>
     </article>
     <article class="panel panel-spotlight alert-panel">
@@ -212,4 +228,9 @@
         {% endfor %}
     </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/china_geo.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard_map.js') }}"></script>
 {% endblock %}

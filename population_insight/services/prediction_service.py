@@ -37,6 +37,7 @@ def build_population_prediction(
     linear = _linear_regression(years, values)
     growth_rate = _compound_growth_rate(values[0], values[-1], years[-1] - years[0])
     recent_growth_rate = _average_recent_growth(values)
+    selected_model = _select_forecast_model(years, values)
 
     predictions = []
     for future_year in future_years:
@@ -44,14 +45,14 @@ def build_population_prediction(
         linear_value = linear["slope"] * future_year + linear["intercept"]
         growth_value = values[-1] * ((1 + growth_rate) ** step)
         recent_value = values[-1] * ((1 + recent_growth_rate) ** step)
-        ensemble_value = linear_value * 0.5 + growth_value * 0.25 + recent_value * 0.25
+        fitted_value = selected_model["predict"](future_year)
         predictions.append(
             {
                 "year": future_year,
                 "linear_value": _round_metric(linear_value, metric),
                 "growth_fit_value": _round_metric(growth_value, metric),
                 "recent_trend_value": _round_metric(recent_value, metric),
-                "predicted_value": _round_metric(max(0, ensemble_value), metric),
+                "predicted_value": _round_metric(max(0, fitted_value), metric),
             }
         )
 
@@ -76,12 +77,14 @@ def build_population_prediction(
         "history": [{"year": item["year"], "value": item[metric]} for item in records],
         "predictions": predictions,
         "model": {
-            "name": "Linear Regression + Growth Rate Ensemble",
+            "name": selected_model["name"],
             "linear_slope": linear["slope"],
             "linear_intercept": linear["intercept"],
-            "r2": linear["r2"],
+            "r2": selected_model["r2"],
             "compound_growth_rate": growth_rate,
             "recent_growth_rate": recent_growth_rate,
+            "validation_mape": selected_model["mape"],
+            "method_note": "候选线性、二次多项式、指数模型，按近期验证误差优先选择；聚合年度数据场景下比单一线性更稳。",
         },
         "structure": structure,
         "risk": risk,
@@ -254,6 +257,100 @@ def _linear_regression(years: list[int], values: list[float]) -> dict[str, float
     ss_res = sum((value - fit) ** 2 for value, fit in zip(values, fitted))
     r2 = 1 - ss_res / ss_tot if ss_tot else 1.0
     return {"slope": slope, "intercept": intercept, "r2": max(0.0, min(1.0, r2))}
+
+
+def _select_forecast_model(years: list[int], values: list[float]) -> dict[str, Any]:
+    candidates = [
+        _linear_model(years, values),
+        _quadratic_model(years, values),
+        _exponential_model(years, values),
+    ]
+    return min(candidates, key=lambda item: (item["mape"], -item["r2"]))
+
+
+def _linear_model(years: list[int], values: list[float]) -> dict[str, Any]:
+    linear = _linear_regression(years, values)
+    return _model_payload(
+        "线性趋势模型",
+        lambda year: linear["slope"] * year + linear["intercept"],
+        years,
+        values,
+    )
+
+
+def _quadratic_model(years: list[int], values: list[float]) -> dict[str, Any]:
+    xs = [year - years[0] for year in years]
+    n = len(xs)
+    sx = sum(xs)
+    sx2 = sum(x ** 2 for x in xs)
+    sx3 = sum(x ** 3 for x in xs)
+    sx4 = sum(x ** 4 for x in xs)
+    sy = sum(values)
+    sxy = sum(x * y for x, y in zip(xs, values))
+    sx2y = sum((x ** 2) * y for x, y in zip(xs, values))
+    a, b, c = _solve_3x3(
+        [[sx4, sx3, sx2], [sx3, sx2, sx], [sx2, sx, n]],
+        [sx2y, sxy, sy],
+    )
+    base_year = years[0]
+    return _model_payload(
+        "二次多项式趋势模型",
+        lambda year: a * ((year - base_year) ** 2) + b * (year - base_year) + c,
+        years,
+        values,
+    )
+
+
+def _exponential_model(years: list[int], values: list[float]) -> dict[str, Any]:
+    safe_values = [max(value, 1e-9) for value in values]
+    linear = _linear_regression(years, [math.log(value) for value in safe_values])
+    return _model_payload(
+        "指数增长模型",
+        lambda year: math.exp(linear["slope"] * year + linear["intercept"]),
+        years,
+        values,
+    )
+
+
+def _model_payload(name: str, predict, years: list[int], values: list[float]) -> dict[str, Any]:
+    fitted = [predict(year) for year in years]
+    mean_y = sum(values) / len(values)
+    ss_tot = sum((value - mean_y) ** 2 for value in values)
+    ss_res = sum((value - fit) ** 2 for value, fit in zip(values, fitted))
+    r2 = 1 - ss_res / ss_tot if ss_tot else 1.0
+    validation_count = min(3, max(1, len(years) // 3))
+    errors = []
+    for index in range(len(years) - validation_count, len(years)):
+        actual = values[index]
+        if actual:
+            errors.append(abs((actual - fitted[index]) / actual))
+    mape = sum(errors) / len(errors) if errors else 0.0
+    return {
+        "name": name,
+        "predict": predict,
+        "r2": max(0.0, min(1.0, r2)),
+        "mape": mape,
+    }
+
+
+def _solve_3x3(matrix: list[list[float]], vector: list[float]) -> tuple[float, float, float]:
+    augmented = [row[:] + [value] for row, value in zip(matrix, vector)]
+    for col in range(3):
+        pivot = max(range(col, 3), key=lambda row: abs(augmented[row][col]))
+        if abs(augmented[pivot][col]) < 1e-12:
+            return 0.0, 0.0, sum(vector) / len(vector)
+        augmented[col], augmented[pivot] = augmented[pivot], augmented[col]
+        pivot_value = augmented[col][col]
+        augmented[col] = [value / pivot_value for value in augmented[col]]
+        for row in range(3):
+            if row == col:
+                continue
+            factor = augmented[row][col]
+            augmented[row] = [
+                current - factor * pivot_current
+                for current, pivot_current in zip(augmented[row], augmented[col])
+            ]
+    return augmented[0][3], augmented[1][3], augmented[2][3]
 
 
 def _compound_growth_rate(start_value: float, end_value: float, periods: int) -> float:

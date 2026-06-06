@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block page_title %}系统设置{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow">System Settings</p>
+            <h3>系统运行参数</h3>
+        </div>
+    </div>
+    <div class="settings-grid">
+        <article>
+            <span>数据口径</span>
+            <strong>省级年度 2015-2024，全国长序列 1950-2025</strong>
+            <p>全国数据独立存储，用于长周期趋势、对比和预测展示。</p>
+        </article>
+        <article>
+            <span>默认账号</span>
+            <strong>admin / viewer</strong>
+            <p>管理员可维护数据和系统项，普通用户可浏览分析页面。</p>
+        </article>
+        <article>
+            <span>图表引擎</span>
+            <strong>ECharts 5</strong>
+            <p>趋势、柱状图、饼图和地图统一使用 ECharts 渲染。</p>
+        </article>
+    </div>
+</section>
+{% endblock %}

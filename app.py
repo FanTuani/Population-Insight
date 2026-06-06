@@ -51,8 +51,15 @@ from population_insight.services.extension_service import (
     list_regions,
 )
 from population_insight.services.log_service import list_operation_logs, log_operation
+from population_insight.services.national_series_service import (
+    build_national_population_prediction,
+    get_national_series_summary,
+    get_national_trend_data,
+    list_national_series,
+)
 from population_insight.services.population_service import (
     add_population_record,
+    get_analysis_regions,
     get_distinct_regions,
     get_distinct_years,
     get_population_record_by_id,
@@ -74,10 +81,14 @@ app.config["SECRET_KEY"] = os.environ.get("POPULATION_INSIGHT_SECRET_KEY", FLASK
 
 
 def _base_context() -> dict:
+    years = get_distinct_years()
+    national_years = list(range(1950, 2026))
     return {
         "metric_options": METRIC_LABELS,
-        "region_options": get_distinct_regions(),
-        "year_options": get_distinct_years(),
+        "region_options": get_analysis_regions(),
+        "province_region_options": get_distinct_regions(),
+        "year_options": sorted(set(years + national_years)),
+        "province_year_options": years,
     }
 
 
@@ -455,13 +466,36 @@ def statistics_view():
 @login_required
 def charts_view():
     context = _base_context()
-    default_region = context["region_options"][0] if context["region_options"] else ""
-    default_year = context["year_options"][-1] if context["year_options"] else ""
+    default_region = "全国"
+    default_year = context["province_year_options"][-1] if context["province_year_options"] else ""
     return render_template(
         "charts.html",
         default_region=default_region,
         default_year=default_year,
         **context,
+    )
+
+
+@app.route("/national-series")
+@login_required
+def national_series_view():
+    records = list_national_series()
+    summary = get_national_series_summary()
+    forecast_years_text = _clean_text(request.args.get("forecast_years")) or "5"
+    prediction = None
+    error_message = None
+    try:
+        prediction = build_national_population_prediction(int(forecast_years_text))
+    except (TypeError, ValueError) as error:
+        error_message = str(error)
+
+    return render_template(
+        "national_series.html",
+        records=records,
+        summary=summary,
+        prediction=prediction,
+        forecast_years=forecast_years_text,
+        error_message=error_message,
     )
 
 
@@ -512,7 +546,7 @@ def comparison_view():
     context = _base_context()
     selected_regions = request.args.getlist("regions")
     if not selected_regions:
-        selected_regions = context["region_options"][:2]
+        selected_regions = ["全国"] + context["province_region_options"][:1]
     metric = _clean_text(request.args.get("metric")) or "total_population"
     start_year_text = _clean_text(request.args.get("start_year"))
     end_year_text = _clean_text(request.args.get("end_year"))
@@ -563,6 +597,31 @@ def export_records():
 def logs_view():
     logs = list_operation_logs(limit=100)
     return render_template("logs.html", logs=logs)
+
+
+@app.route("/settings")
+@admin_required
+def settings_view():
+    return render_template("settings.html")
+
+
+@app.route("/users")
+@admin_required
+def users_view():
+    from population_insight.db.connection import fetch_all
+
+    users = fetch_all("SELECT id, username, role, created_at FROM users ORDER BY username ASC")
+    return render_template("users.html", users=users)
+
+
+@app.route("/permissions")
+@admin_required
+def permissions_view():
+    permissions = [
+        {"role": "admin", "scope": "全部页面、数据写入、系统维护、日志审计"},
+        {"role": "viewer", "scope": "概览、数据浏览、统计、对比、预测、图表、预警、报告浏览"},
+    ]
+    return render_template("permissions.html", permissions=permissions)
 
 
 @app.route("/regions", methods=["GET", "POST"])
@@ -667,7 +726,9 @@ def chart_bar_api():
     try:
         year = ensure_year(request.args.get("year", ""))
         metric = _clean_text(request.args.get("metric"))
-        return jsonify({"success": True, "data": get_chart_bar_data(year, metric)})
+        sort_by = _clean_text(request.args.get("sort_by")) or "value"
+        sort_order = _clean_text(request.args.get("sort_order")) or "desc"
+        return jsonify({"success": True, "data": get_chart_bar_data(year, metric, sort_by, sort_order)})
     except ValueError as error:
         return jsonify({"success": False, "message": str(error)}), 400
 
@@ -707,6 +768,51 @@ def comparison_api():
             end_year=_parse_optional_year(request.args.get("end_year")),
         )
         return jsonify({"success": True, "data": data})
+    except ValueError as error:
+        return jsonify({"success": False, "message": str(error)}), 400
+
+
+@app.route("/api/dashboard/map")
+@login_required
+def dashboard_map_api():
+    try:
+        metric = _clean_text(request.args.get("metric")) or "total_population"
+        year = ensure_year(request.args.get("year", ""))
+        records = query_population_records({"year": year})
+        if metric not in METRIC_LABELS:
+            raise ValueError("不支持的地图指标。")
+        data = [
+            {
+                "name": item["region"],
+                "value": item[metric],
+                "year": item["year"],
+                "population": item["total_population"],
+                "birthRate": item["birth_rate"],
+                "agingRate": item["aging_rate"],
+            }
+            for item in records
+        ]
+        return jsonify(
+            {
+                "success": True,
+                "data": {
+                    "year": year,
+                    "metric": metric,
+                    "metricLabel": METRIC_LABELS[metric],
+                    "items": data,
+                },
+            }
+        )
+    except ValueError as error:
+        return jsonify({"success": False, "message": str(error)}), 400
+
+
+@app.route("/api/national-series/trend")
+@login_required
+def national_series_trend_api():
+    try:
+        metric = _clean_text(request.args.get("metric")) or "total_population"
+        return jsonify({"success": True, "data": get_national_trend_data(metric)})
     except ValueError as error:
         return jsonify({"success": False, "message": str(error)}), 400
 

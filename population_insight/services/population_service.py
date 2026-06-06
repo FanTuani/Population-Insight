@@ -8,6 +8,41 @@ from population_insight.db.connection import fetch_all, fetch_one, get_connectio
 from population_insight.services.log_service import log_operation
 from population_insight.utils.validators import validate_population_payload
 
+REGION_PINYIN_ORDER = {
+    "安徽省": "anhui",
+    "北京市": "beijing",
+    "重庆市": "chongqing",
+    "福建省": "fujian",
+    "甘肃省": "gansu",
+    "广东省": "guangdong",
+    "广西壮族自治区": "guangxi",
+    "贵州省": "guizhou",
+    "海南省": "hainan",
+    "河北省": "hebei",
+    "河南省": "henan",
+    "黑龙江省": "heilongjiang",
+    "湖北省": "hubei",
+    "湖南省": "hunan",
+    "吉林省": "jilin",
+    "江苏省": "jiangsu",
+    "江西省": "jiangxi",
+    "辽宁省": "liaoning",
+    "内蒙古自治区": "neimenggu",
+    "宁夏回族自治区": "ningxia",
+    "青海省": "qinghai",
+    "山东省": "shandong",
+    "山西省": "shanxi",
+    "陕西省": "shaanxi",
+    "上海市": "shanghai",
+    "四川省": "sichuan",
+    "天津市": "tianjin",
+    "西藏自治区": "xizang",
+    "新疆维吾尔自治区": "xinjiang",
+    "云南省": "yunnan",
+    "浙江省": "zhejiang",
+    "全国": "quanguo",
+}
+
 INSERT_FIELDS = [
     "region",
     "year",
@@ -149,14 +184,27 @@ def sort_population_records(
         raise ValueError("不支持的排序字段。")
 
     reverse = order.lower() == "desc"
+    if field == "region":
+        return sorted(records, key=lambda item: _region_sort_key(item.get("region", "")), reverse=reverse)
     return sorted(records, key=lambda item: item.get(field), reverse=reverse)
 
 
 def get_distinct_regions() -> list[str]:
-    rows = fetch_all("SELECT DISTINCT region FROM population_data ORDER BY region ASC")
-    return [row["region"] for row in rows]
+    rows = fetch_all("SELECT DISTINCT region FROM population_data")
+    return sorted([row["region"] for row in rows], key=_region_sort_key)
+
+
+def get_analysis_regions(include_national: bool = True) -> list[str]:
+    regions = get_distinct_regions()
+    if include_national and "全国" not in regions:
+        regions.append("全国")
+    return sorted(regions, key=_region_sort_key)
 
 
 def get_distinct_years() -> list[int]:
     rows = fetch_all("SELECT DISTINCT year FROM population_data ORDER BY year ASC")
     return [row["year"] for row in rows]
+
+
+def _region_sort_key(region: str) -> tuple[str, str]:
+    return (REGION_PINYIN_ORDER.get(region, region), region)

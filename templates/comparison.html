@@ -16,7 +16,7 @@
     </div>
     <form method="get" class="form-grid" id="comparison-filter" data-endpoint="{{ url_for('comparison_api') }}">
         <label>
-            <span>对比指标</span>
+            <span>对比指标 <button type="button" class="help-dot" data-tip="选择全国时使用 1950-2025 全国长序列；省级地区仍使用 2015-2024 年度表。">?</button></span>
             <select name="metric">
                 {% for metric, label in metric_options.items() %}
                 <option value="{{ metric }}" {% if filters.metric == metric %}selected{% endif %}>{{ label }}</option>
@@ -25,17 +25,21 @@
         </label>
         <label>
             <span>起始年份</span>
-            <input type="number" name="start_year" value="{{ filters.start_year }}">
+            <input type="number" name="start_year" value="{{ filters.start_year or 1950 }}" placeholder="1950">
         </label>
         <label>
             <span>结束年份</span>
-            <input type="number" name="end_year" value="{{ filters.end_year }}">
+            <input type="number" name="end_year" value="{{ filters.end_year or 2025 }}" placeholder="2025">
         </label>
         <div class="form-actions">
             <button type="submit" class="primary-button">更新对比</button>
         </div>
         <div class="full-span region-checks">
-            {% for region in region_options %}
+            <label class="check-option check-option-national">
+                <input type="checkbox" name="regions" value="全国" {% if '全国' in filters.regions %}checked{% endif %}>
+                <span>全国</span>
+            </label>
+            {% for region in province_region_options %}
             <label class="check-option">
                 <input type="checkbox" name="regions" value="{{ region }}" {% if region in filters.regions %}checked{% endif %}>
                 <span>{{ region }}</span>

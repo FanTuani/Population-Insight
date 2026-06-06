@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block page_title %}全国长序列{% endblock %}
+
+{% block content %}
+<section class="hero-strip national-hero">
+    <div>
+        <p class="eyebrow">National Time Series</p>
+        <h3>1950-2025 年全国人口统计长序列</h3>
+        <p class="section-copy">独立保存全国年度人口、出生率、死亡率、自然增长率和城镇化率，避免与省级年度数据混用，适合趋势观察、预测和答辩展示。</p>
+    </div>
+    <div class="hero-actions">
+        <a href="#national-chart-panel" class="primary-button">查看趋势图</a>
+        <a href="#national-table" class="secondary-button">查看数据表</a>
+    </div>
+</section>
+
+<section class="metric-grid metric-grid-hero">
+    <article class="metric-card">
+        <span>覆盖年份</span>
+        <strong>{{ summary.min_year or '-' }} - {{ summary.max_year or '-' }}</strong>
+    </article>
+    <article class="metric-card">
+        <span>年度记录</span>
+        <strong>{{ summary.total_years }}</strong>
+    </article>
+    <article class="metric-card">
+        <span>最新总人口</span>
+        <strong>{{ "{:,.0f}".format(summary.latest.total_population / 10000) if summary.latest else '-' }}</strong>
+        <small>万人</small>
+    </article>
+    <article class="metric-card">
+        <span>人口峰值年份</span>
+        <strong>{{ summary.peak.year if summary.peak else '-' }}</strong>
+        <small>{{ "{:,.0f}".format(summary.peak.total_population / 10000) if summary.peak else '-' }} 万人</small>
+    </article>
+</section>
+
+<section class="bi-grid bi-grid-2">
+    <article class="panel" id="national-chart-panel">
+        <div class="panel-header spread">
+            <div>
+                <p class="eyebrow">Trend View</p>
+                <h3>全国人口指标趋势</h3>
+            </div>
+            <form class="chart-form compact-form" data-national-trend-form data-endpoint="{{ url_for('national_series_trend_api') }}">
+                <label>
+                    <span>指标</span>
+                    <select name="metric">
+                        <option value="total_population">总人口</option>
+                        <option value="birth_rate">出生率</option>
+                        <option value="death_rate">死亡率</option>
+                        <option value="natural_growth_rate">自然增长率</option>
+                        <option value="urbanization_rate">城镇化率</option>
+                    </select>
+                </label>
+            </form>
+        </div>
+        <div id="national-trend-chart" class="chart-surface" role="img" aria-label="全国人口长序列趋势图"></div>
+        <p class="source-note">说明：1950-1959 年来自国家统计局年鉴早期人口长序列整理；1960-2024 年使用 World Bank WDI 并交叉官方统计源；2025 年使用国家统计局统计公报。</p>
+    </article>
+
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow">Forecast</p>
+                <h3>全国总人口短期预测</h3>
+            </div>
+        </div>
+        {% if prediction %}
+        <div class="forecast-summary">
+            <span>模型</span>
+            <strong>{{ prediction.model.name }}</strong>
+            <small>R2 = {{ "%.3f"|format(prediction.model.r2) }}</small>
+        </div>
+        <div class="list-stack">
+            {% for item in prediction.predictions %}
+            <div class="list-row compact-row">
+                <span>{{ item.year }} 年</span>
+                <strong>{{ "{:,.0f}".format(item.predicted_value / 10000) }} 万人</strong>
+                <em>预测</em>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="muted">{{ error_message or "暂无预测数据。" }}</p>
+        {% endif %}
+        <form class="inline-filter mini-forecast-form" method="get">
+            <label>
+                <span>预测年数</span>
+                <input type="number" name="forecast_years" min="1" max="10" value="{{ forecast_years }}">
+            </label>
+            <button class="secondary-button" type="submit">重新预测</button>
+        </form>
+    </article>
+</section>
+
+<section class="panel" id="national-table">
+    <div class="panel-header spread">
+        <div>
+            <p class="eyebrow">Data Table</p>
+            <h3>全国年度人口数据</h3>
+        </div>
+        <input class="search-field" type="search" placeholder="搜索年份或来源" data-table-search="#national-series-table">
+    </div>
+    <div class="table-wrap">
+        <table id="national-series-table">
+            <thead>
+                <tr>
+                    <th>年份</th>
+                    <th>总人口</th>
+                    <th>出生率(‰)</th>
+                    <th>死亡率(‰)</th>
+                    <th>自然增长率(‰)</th>
+                    <th>城镇人口</th>
+                    <th>城镇化率</th>
+                    <th>来源</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in records %}
+                <tr>
+                    <td>{{ item.year }}</td>
+                    <td>{{ "{:,.0f}".format(item.total_population) }}</td>
+                    <td>{{ "%.2f"|format(item.birth_rate) if item.birth_rate is not none else "-" }}</td>
+                    <td>{{ "%.2f"|format(item.death_rate) if item.death_rate is not none else "-" }}</td>
+                    <td>{{ "%.2f"|format(item.natural_growth_rate) if item.natural_growth_rate is not none else "-" }}</td>
+                    <td>{{ "{:,.0f}".format(item.urban_population) if item.urban_population is not none else "-" }}</td>
+                    <td>{{ "%.2f"|format(item.urbanization_rate) ~ "%" if item.urbanization_rate is not none else "-" }}</td>
+                    <td>{{ item.source_name }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="empty-cell">暂无全国长序列数据。</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script src="{{ url_for('static', filename='js/national_series.js') }}"></script>
+{% endblock %}

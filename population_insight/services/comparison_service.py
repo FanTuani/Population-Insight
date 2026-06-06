@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from population_insight.config import METRIC_LABELS
+from population_insight.services.national_series_service import list_national_metric_records
 from population_insight.services.population_service import get_distinct_regions, query_population_records
 
 
@@ -23,6 +24,14 @@ def build_region_comparison(
 
     records = query_population_records({"start_year": start_year, "end_year": end_year})
     records = [record for record in records if record["region"] in selected_regions]
+    if "全国" in selected_regions:
+        records.extend(
+            list_national_metric_records(
+                metric=metric,
+                start_year=start_year,
+                end_year=end_year,
+            )
+        )
     if not records:
         raise ValueError("当前条件下没有可对比的数据。")
 

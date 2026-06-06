@@ -3,6 +3,8 @@ from __future__ import annotations
 from population_insight.config import METRIC_LABELS
 from population_insight.db.connection import fetch_all, fetch_one
 from population_insight.services.log_service import list_operation_logs
+from population_insight.services.national_series_service import get_national_series_summary
+from population_insight.services.national_series_service import list_national_metric_records
 from population_insight.services.population_service import (
     get_distinct_regions,
     get_distinct_years,
@@ -50,6 +52,7 @@ def get_dashboard_summary() -> dict:
         }
 
     health = get_global_data_health()
+    national_summary = get_national_series_summary()
 
     return {
         "total_records": summary.get("total_records", 0) or 0,
@@ -62,6 +65,7 @@ def get_dashboard_summary() -> dict:
         "top_regions": top_regions,
         "aging_hotspots": aging_hotspots,
         "health": health,
+        "national_summary": national_summary,
         "regions": regions,
         "years": years,
         "recent_logs": recent_logs,
@@ -81,6 +85,9 @@ def get_global_data_health() -> dict:
         """
     ) or {}
     source = fetch_one("SELECT COUNT(*) AS source_count FROM data_sources") or {}
+    national = fetch_one(
+        "SELECT MAX(year) AS latest_year FROM national_population_series"
+    ) or {}
     latest_year = population.get("latest_year")
     latest_year_records = 0
     if latest_year:
@@ -108,6 +115,7 @@ def get_global_data_health() -> dict:
         "latest_year": latest_year,
         "latest_year_records": latest_year_records,
         "source_count": source.get("source_count", 0) or 0,
+        "national_latest_year": national.get("latest_year"),
         "sourced_records": sourced_records,
         "qualified_records": population.get("qualified_records", 0) or 0,
         "sourced_rate": sourced_rate,
@@ -125,11 +133,14 @@ def get_chart_trend_data_with_mode(region: str, metric: str, mode: str = "relati
     if mode not in {"relative", "absolute"}:
         raise ValueError("不支持的趋势图展示方式。")
 
-    records = [
-        item
-        for item in query_population_records({"region": region})
-        if item["region"] == region
-    ]
+    if region == "全国":
+        records = list_national_metric_records(metric=metric)
+    else:
+        records = [
+            item
+            for item in query_population_records({"region": region})
+            if item["region"] == region
+        ]
     if not records:
         raise ValueError("该地区没有可视化数据。")
 
@@ -165,7 +176,7 @@ def get_chart_trend_data_with_mode(region: str, metric: str, mode: str = "relati
     }
 
 
-def get_chart_bar_data(year: int, metric: str) -> dict:
+def get_chart_bar_data(year: int, metric: str, sort_by: str = "value", sort_order: str = "desc") -> dict:
     if metric not in METRIC_LABELS:
         raise ValueError("不支持的图表指标。")
 
@@ -173,7 +184,13 @@ def get_chart_bar_data(year: int, metric: str) -> dict:
     if not records:
         raise ValueError("该年份没有可视化数据。")
 
-    records.sort(key=lambda item: item[metric], reverse=True)
+    reverse = sort_order != "asc"
+    if sort_by == "name":
+        from population_insight.services.population_service import _region_sort_key
+
+        records.sort(key=lambda item: _region_sort_key(item["region"]), reverse=reverse)
+    else:
+        records.sort(key=lambda item: item[metric], reverse=reverse)
     return {
         "title": f"{year}年各地区{METRIC_LABELS[metric]}对比图",
         "xAxis": [item["region"] for item in records],

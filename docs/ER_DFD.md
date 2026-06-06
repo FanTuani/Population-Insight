@@ -93,12 +93,30 @@ erDiagram
         TEXT created_at
     }
 
+    national_population_series {
+        INTEGER id PK
+        INTEGER year UK
+        INTEGER total_population
+        REAL birth_rate
+        REAL death_rate
+        REAL natural_growth_rate
+        INTEGER urban_population
+        REAL urbanization_rate
+        TEXT source_name
+        TEXT source_url
+        TEXT data_quality
+        TEXT remarks
+        TEXT created_at
+        TEXT updated_at
+    }
+
     users ||--o{ operation_logs : "username records actions"
     users ||--o{ analysis_reports : "username saves reports"
     regions ||--o{ population_data : "name matches region"
     regions ||--o{ annual_indicator_values : "name matches region"
     population_indicators ||--o{ annual_indicator_values : "code maps indicator_code"
     population_data ||--o{ analysis_reports : "filtered statistics become reports"
+    national_population_series ||--o{ analysis_reports : "national trend outputs become reports"
     data_sources ||--o{ population_data : "source documents support data"
 ```
 
@@ -143,6 +161,7 @@ flowchart TB
     d6[("D6 annual_indicator_values")]
     d7[("D7 analysis_reports")]
     d8[("D8 operation_logs")]
+    d9[("D9 national_population_series")]
 
     user --> p1
     p1 <--> d1
@@ -161,12 +180,14 @@ flowchart TB
 
     user --> p4
     p4 <--> d2
+    p4 <--> d9
     p4 <--> d5
     p4 <--> d6
     p4 --> user
 
     user --> p5
     p5 <--> d2
+    p5 <--> d9
     p5 --> user
 
     user --> p6

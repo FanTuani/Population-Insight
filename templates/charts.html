@@ -24,7 +24,7 @@
         </div>
         <form class="chart-form" data-endpoint="{{ url_for('chart_trend_api') }}" data-target="trend-chart">
             <label>
-                <span>地区</span>
+                <span>地区 <button type="button" class="help-dot" data-tip="选择全国时使用 1950-2025 全国长序列；选择省份时使用省级年度数据。">?</button></span>
                 <select name="region">
                     {% for region in region_options %}
                     <option value="{{ region }}" {% if region == default_region %}selected{% endif %}>{{ region }}</option>
@@ -32,7 +32,7 @@
                 </select>
             </label>
             <label>
-                <span>指标</span>
+                <span>指标 <button type="button" class="help-dot" data-tip="人口规模、出生率、死亡率、自然增长率、老龄化率、城镇化率等统计指标。">?</button></span>
                 <select name="metric">
                     {% for metric, label in metric_options.items() %}
                     <option value="{{ metric }}" {% if metric == 'total_population' %}selected{% endif %}>{{ label }}</option>
@@ -40,7 +40,7 @@
                 </select>
             </label>
             <label>
-                <span>显示方式</span>
+                <span>显示方式 <button type="button" class="help-dot" data-tip="相对变化以首年为基期，实际值展示原始统计量。">?</button></span>
                 <select name="mode">
                     <option value="relative" selected>相对变化（推荐）</option>
                     <option value="absolute">实际值</option>
@@ -58,7 +58,7 @@
         </div>
         <form class="chart-form" data-endpoint="{{ url_for('chart_bar_api') }}" data-target="bar-chart">
             <label>
-                <span>年份</span>
+                <span>年份 <button type="button" class="help-dot" data-tip="年度柱状图展示同一年各省级地区对比，当前省级表覆盖 2015-2024。">?</button></span>
                 <select name="year">
                     {% for year in year_options %}
                     <option value="{{ year }}" {% if year == default_year %}selected{% endif %}>{{ year }}</option>
@@ -71,6 +71,20 @@
                     {% for metric, label in metric_options.items() %}
                     <option value="{{ metric }}" {% if metric == 'total_population' %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
+                </select>
+            </label>
+            <label>
+                <span>排序字段</span>
+                <select name="sort_by">
+                    <option value="value" selected>按数值</option>
+                    <option value="name">按地区首字母</option>
+                </select>
+            </label>
+            <label>
+                <span>排序方式</span>
+                <select name="sort_order">
+                    <option value="desc" selected>降序</option>
+                    <option value="asc">升序</option>
                 </select>
             </label>
         </form>

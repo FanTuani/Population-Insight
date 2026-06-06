@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block page_title %}权限管理{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow">Permissions</p>
+            <h3>角色权限矩阵</h3>
+        </div>
+    </div>
+    <div class="list-stack">
+        {% for item in permissions %}
+        <div class="list-row">
+            <span>{{ item.role }}</span>
+            <strong>{{ item.scope }}</strong>
+            <em>已启用</em>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

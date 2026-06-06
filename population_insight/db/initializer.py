@@ -10,6 +10,7 @@ from population_insight.config import (
     INITIAL_REGIONS,
 )
 from population_insight.db.connection import fetch_one, get_connection
+from population_insight.services.national_series_service import build_seed_records
 from population_insight.utils.security import hash_password
 
 
@@ -105,6 +106,23 @@ def create_tables() -> None:
                 filter_summary TEXT DEFAULT '',
                 report_summary TEXT NOT NULL,
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS national_population_series (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                year INTEGER NOT NULL UNIQUE,
+                total_population INTEGER NOT NULL CHECK(total_population >= 0),
+                birth_rate REAL,
+                death_rate REAL,
+                natural_growth_rate REAL,
+                urban_population INTEGER CHECK(urban_population IS NULL OR urban_population >= 0),
+                urbanization_rate REAL,
+                source_name TEXT DEFAULT '',
+                source_url TEXT DEFAULT '',
+                data_quality TEXT DEFAULT '',
+                remarks TEXT DEFAULT '',
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             );
             """
         )
@@ -276,6 +294,71 @@ def seed_extension_data() -> None:
         connection.commit()
 
 
+def seed_national_series() -> None:
+    existing = fetch_one(
+        """
+        SELECT COUNT(*) AS count, MIN(year) AS min_year, MAX(year) AS max_year
+        FROM national_population_series
+        """
+    )
+    if (
+        existing
+        and existing.get("count", 0) >= 76
+        and existing.get("min_year") == 1950
+        and existing.get("max_year") == 2025
+    ):
+        return
+
+    records = build_seed_records()
+    with get_connection() as connection:
+        connection.executemany(
+            """
+            INSERT INTO national_population_series (
+                year,
+                total_population,
+                birth_rate,
+                death_rate,
+                natural_growth_rate,
+                urban_population,
+                urbanization_rate,
+                source_name,
+                source_url,
+                data_quality,
+                remarks
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(year) DO UPDATE SET
+                total_population = excluded.total_population,
+                birth_rate = excluded.birth_rate,
+                death_rate = excluded.death_rate,
+                natural_growth_rate = excluded.natural_growth_rate,
+                urban_population = excluded.urban_population,
+                urbanization_rate = excluded.urbanization_rate,
+                source_name = excluded.source_name,
+                source_url = excluded.source_url,
+                data_quality = excluded.data_quality,
+                remarks = excluded.remarks,
+                updated_at = CURRENT_TIMESTAMP
+            """,
+            [
+                (
+                    item["year"],
+                    item["total_population"],
+                    item.get("birth_rate"),
+                    item.get("death_rate"),
+                    item.get("natural_growth_rate"),
+                    item.get("urban_population"),
+                    item.get("urbanization_rate"),
+                    item.get("source_name", ""),
+                    item.get("source_url", ""),
+                    item.get("data_quality", ""),
+                    item.get("remarks", ""),
+                )
+                for item in records
+            ],
+        )
+        connection.commit()
+
+
 def init_database() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     CHART_DIR.mkdir(parents=True, exist_ok=True)
@@ -285,3 +368,4 @@ def init_database() -> None:
     seed_users()
     seed_sample_data()
     seed_extension_data()
+    seed_national_series()

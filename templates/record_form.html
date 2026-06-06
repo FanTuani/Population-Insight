@@ -12,18 +12,18 @@
     </div>
 
     <form method="post" class="form-grid">
-        <label><span>地区</span><input type="text" name="region" value="{{ form_data.get('region', '') }}" list="record-form-regions" required></label>
+        <label><span>地区</span><input type="text" name="region" value="{{ form_data.get('region', '') or '北京市' }}" list="record-form-regions" required></label>
         <datalist id="record-form-regions">
             {% for region in region_options %}<option value="{{ region }}">{% endfor %}
         </datalist>
-        <label><span>年份</span><input type="number" name="year" value="{{ form_data.get('year', '') }}" required></label>
-        <label><span>总人口</span><input type="number" name="total_population" value="{{ form_data.get('total_population', '') }}" required></label>
-        <label><span>男性人口</span><input type="number" name="male_population" value="{{ form_data.get('male_population', '') }}" required></label>
-        <label><span>女性人口</span><input type="number" name="female_population" value="{{ form_data.get('female_population', '') }}" required></label>
-        <label><span>出生率</span><input type="number" step="0.01" name="birth_rate" value="{{ form_data.get('birth_rate', '') }}" required></label>
-        <label><span>死亡率</span><input type="number" step="0.01" name="death_rate" value="{{ form_data.get('death_rate', '') }}" required></label>
-        <label><span>老龄化率</span><input type="number" step="0.01" name="aging_rate" value="{{ form_data.get('aging_rate', '') }}" required></label>
-        <label><span>城镇化率</span><input type="number" step="0.01" name="urbanization_rate" value="{{ form_data.get('urbanization_rate', '') }}" required></label>
+        <label><span>年份</span><input type="number" name="year" value="{{ form_data.get('year', '') or 2024 }}" required></label>
+        <label><span>总人口 <button type="button" class="help-dot" data-tip="单位为人，系统会校验男女合计应等于总人口。">?</button></span><input type="number" name="total_population" value="{{ form_data.get('total_population', '') or 10000000 }}" required></label>
+        <label><span>男性人口</span><input type="number" name="male_population" value="{{ form_data.get('male_population', '') or 5100000 }}" required></label>
+        <label><span>女性人口</span><input type="number" name="female_population" value="{{ form_data.get('female_population', '') or 4900000 }}" required></label>
+        <label><span>出生率 <button type="button" class="help-dot" data-tip="年度出生人口与平均人口之比，按本系统口径录入数值。">?</button></span><input type="number" step="0.01" name="birth_rate" value="{{ form_data.get('birth_rate', '') or 6.50 }}" required></label>
+        <label><span>死亡率</span><input type="number" step="0.01" name="death_rate" value="{{ form_data.get('death_rate', '') or 7.00 }}" required></label>
+        <label><span>老龄化率 <button type="button" class="help-dot" data-tip="老龄化率口径由下方“老龄化口径”选择。">?</button></span><input type="number" step="0.01" name="aging_rate" value="{{ form_data.get('aging_rate', '') or 18.00 }}" required></label>
+        <label><span>城镇化率</span><input type="number" step="0.01" name="urbanization_rate" value="{{ form_data.get('urbanization_rate', '') or 65.00 }}" required></label>
         <label>
             <span>老龄化口径</span>
             <select name="aging_rate_basis">
@@ -32,9 +32,9 @@
                 {% endfor %}
             </select>
         </label>
-        <label><span>数据来源名称</span><input type="text" name="data_source_name" value="{{ form_data.get('data_source_name', '') }}"></label>
+        <label><span>数据来源名称</span><input type="text" name="data_source_name" value="{{ form_data.get('data_source_name', '') or '统计年鉴/统计公报' }}"></label>
         <label><span>来源链接</span><input type="url" name="source_url" value="{{ form_data.get('source_url', '') }}"></label>
-        <label><span>数据质量</span><input type="text" name="data_quality" value="{{ form_data.get('data_quality', '') }}" placeholder="official_verified"></label>
+        <label><span>数据质量</span><input type="text" name="data_quality" value="{{ form_data.get('data_quality', '') or '高' }}" placeholder="高"></label>
         <label class="full-span"><span>备注</span><textarea name="remarks" rows="4">{{ form_data.get('remarks', '') }}</textarea></label>
         <div class="form-actions full-span">
             <button type="submit" class="primary-button">{{ '保存新增记录' if mode == 'create' else '保存修改' }}</button>

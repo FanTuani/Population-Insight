@@ -27,12 +27,12 @@
 
             <div class="sidebar-scroll">
                 <nav class="nav sidebar-nav">
-                    <section class="nav-group nav-group-core {% if request.path in ['/', '/statistics', '/comparison', '/prediction', '/charts', '/alerts', '/reports'] %}is-open{% endif %}" data-nav-group>
+                    <section class="nav-group nav-group-core {% if request.path in ['/', '/statistics', '/comparison', '/prediction', '/national-series', '/charts', '/alerts', '/reports'] %}is-open{% endif %}" data-nav-group>
                         <button
                             class="nav-group-toggle"
                             type="button"
                             data-nav-group-toggle
-                            aria-expanded="{% if request.path in ['/', '/statistics', '/comparison', '/prediction', '/charts', '/alerts', '/reports'] %}true{% else %}false{% endif %}">
+                            aria-expanded="{% if request.path in ['/', '/statistics', '/comparison', '/prediction', '/national-series', '/charts', '/alerts', '/reports'] %}true{% else %}false{% endif %}">
                             <span class="nav-section">核心分析</span>
                             <i class="nav-group-arrow"></i>
                         </button>
@@ -55,6 +55,11 @@
                             <a href="{{ url_for('prediction_view') }}" class="nav-link {% if request.path == '/prediction' %}active{% endif %}" title="趋势预测">
                                 <span class="nav-icon icon-trend"></span>
                                 <span class="nav-label">  趋势预测</span>
+                                <i class="nav-arrow"></i>
+                            </a>
+                            <a href="{{ url_for('national_series_view') }}" class="nav-link {% if request.path == '/national-series' %}active{% endif %}" title="全国长序列">
+                                <span class="nav-icon icon-national"></span>
+                                <span class="nav-label">全国长序列</span>
                                 <i class="nav-arrow"></i>
                             </a>
                             <a href="{{ url_for('charts_view') }}" class="nav-link {% if request.path == '/charts' %}active{% endif %}" title="图表中心">
@@ -114,7 +119,7 @@
                         </div>
                     </section>
 
-                    <section class="nav-group nav-group-system {% if request.path == '/logs' %}is-open{% endif %}" data-nav-group>
+                    <section class="nav-group nav-group-system {% if request.path in ['/logs', '/settings', '/users', '/permissions'] %}is-open{% endif %}" data-nav-group>
                         <button
                             class="nav-group-toggle"
                             type="button"
@@ -129,17 +134,17 @@
                                 <span class="nav-label">操作日志</span>
                                 <i class="nav-arrow"></i>
                             </a>
-                            <a href="#" class="nav-link is-disabled" title="系统设置（即将开放）" aria-disabled="true">
+                            <a href="{{ url_for('settings_view') }}" class="nav-link {% if request.path == '/settings' %}active{% endif %}" title="系统设置">
                                 <span class="nav-icon icon-settings"></span>
                                 <span class="nav-label">系统设置</span>
                                 <i class="nav-arrow"></i>
                             </a>
-                            <a href="#" class="nav-link is-disabled" title="用户管理（即将开放）" aria-disabled="true">
+                            <a href="{{ url_for('users_view') }}" class="nav-link {% if request.path == '/users' %}active{% endif %}" title="用户管理">
                                 <span class="nav-icon icon-user"></span>
                                 <span class="nav-label">用户管理</span>
                                 <i class="nav-arrow"></i>
                             </a>
-                            <a href="#" class="nav-link is-disabled" title="权限管理（即将开放）" aria-disabled="true">
+                            <a href="{{ url_for('permissions_view') }}" class="nav-link {% if request.path == '/permissions' %}active{% endif %}" title="权限管理">
                                 <span class="nav-icon icon-shield"></span>
                                 <span class="nav-label">权限管理</span>
                                 <i class="nav-arrow"></i>
@@ -176,6 +181,9 @@
                     <span class="status-pill">最新 {{ data_health.latest_year or '-' }}</span>
                     <span class="status-pill">{{ data_health.region_count }} 地区</span>
                     <span class="status-pill">{{ data_health.source_count }} 来源</span>
+                    {% if data_health.national_latest_year %}
+                    <span class="status-pill">全国 {{ data_health.national_latest_year }}</span>
+                    {% endif %}
                 </div>
                 {% endif %}
             </header>

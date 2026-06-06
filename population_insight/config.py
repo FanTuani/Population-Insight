@@ -9,7 +9,7 @@ DB_PATH = DATA_DIR / "population_insight.db"
 FLASK_SECRET_KEY = "population-insight-course-design"
 WEB_PAGE_SIZE = 10
 
-YEAR_MIN = 2000
+YEAR_MIN = 1950
 YEAR_MAX = 2035
 
 DEFAULT_USERS = [
