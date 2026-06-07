@@ -13,8 +13,12 @@
         <a href="{{ url_for('sources_view') }}" class="secondary-button">数据来源整理</a>
     </div>
 
-    <form method="post" class="form-grid">
+    <form method="post" class="form-grid" enctype="multipart/form-data">
         <input type="hidden" name="action" value="preview">
+        <label class="full-span">
+            <span>上传 CSV 文件</span>
+            <input type="file" name="csv_file" accept=".csv,text/csv">
+        </label>
         <label class="full-span">
             <span>公开数据链接</span>
             <input type="url" name="source_url" value="{{ form_data.get('source_url', '') }}" placeholder="https://example.gov.cn/population.csv">

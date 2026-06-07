@@ -1,11 +1,17 @@
 from __future__ import annotations
 
 import json
-import sqlite3
 from datetime import datetime
 from typing import Any
 
-from population_insight.db.connection import execute_write, fetch_all, fetch_one, get_connection
+from population_insight.db.connection import (
+    execute_write,
+    fetch_all,
+    fetch_one,
+    get_connection,
+    get_integrity_error_types,
+    is_unique_constraint_error,
+)
 from population_insight.services.log_service import log_operation
 from population_insight.services.population_service import query_population_records
 from population_insight.utils.validators import (
@@ -41,7 +47,7 @@ def add_region(data: dict[str, Any], username: str = "system") -> int:
             """,
             values,
         )
-    except sqlite3.IntegrityError as error:
+    except get_integrity_error_types() as error:
         raise ValueError("地区名称已存在。") from error
     log_operation(username, "ADD_REGION", record_id, name)
     return record_id
@@ -80,7 +86,7 @@ def add_data_source(data: dict[str, Any], username: str = "system") -> int:
             """,
             values,
         )
-    except sqlite3.IntegrityError as error:
+    except get_integrity_error_types() as error:
         raise ValueError("数据来源名称已存在。") from error
     log_operation(username, "ADD_DATA_SOURCE", record_id, name)
     return record_id
@@ -102,7 +108,7 @@ def add_population_indicator(data: dict[str, Any], username: str = "system") -> 
             """,
             (code, name, unit, _clean(data.get("description"))),
         )
-    except sqlite3.IntegrityError as error:
+    except get_integrity_error_types() as error:
         raise ValueError("指标编码已存在。") from error
     log_operation(username, "ADD_INDICATOR", record_id, code)
     return record_id
@@ -144,8 +150,8 @@ def add_annual_indicator_value(data: dict[str, Any], username: str = "system") -
             """,
             (region, year, indicator_code, value, _clean(data.get("remarks"))),
         )
-    except sqlite3.IntegrityError as error:
-        if "UNIQUE constraint failed" in str(error):
+    except get_integrity_error_types() as error:
+        if is_unique_constraint_error(error):
             raise ValueError("同一地区、年份、指标的扩展值已存在。") from error
         raise ValueError("年度扩展指标值保存失败。") from error
     log_operation(username, "ADD_INDICATOR_VALUE", record_id, f"{region}-{year}-{indicator_code}")
@@ -211,9 +217,17 @@ def get_extension_counts() -> dict[str, int]:
             "analysis_reports",
         ]
         return {
-            table: connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+            table: _first_value(connection.execute(f"SELECT COUNT(*) AS count FROM {table}").fetchone())
             for table in table_names
         }
+
+
+def _first_value(row: dict[str, Any] | tuple | None) -> Any:
+    if row is None:
+        return 0
+    if isinstance(row, dict):
+        return next(iter(row.values()))
+    return row[0]
 
 
 def _alert(record: dict[str, Any], alert_type: str, severity: str, message: str) -> dict[str, Any]:

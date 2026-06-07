@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -6,6 +7,15 @@ OUTPUT_DIR = BASE_DIR / "output"
 CHART_DIR = OUTPUT_DIR / "charts"
 EXPORT_DIR = OUTPUT_DIR / "exports"
 DB_PATH = DATA_DIR / "population_insight.db"
+DB_ENGINE = os.getenv("POPULATION_INSIGHT_DB_ENGINE", "sqlite").strip().lower()
+MYSQL_CONFIG = {
+    "host": os.getenv("MYSQL_HOST", "127.0.0.1"),
+    "port": int(os.getenv("MYSQL_PORT", "3306")),
+    "user": os.getenv("MYSQL_USER", "root"),
+    "password": os.getenv("MYSQL_PASSWORD", ""),
+    "database": os.getenv("MYSQL_DATABASE", "population_insight"),
+    "charset": os.getenv("MYSQL_CHARSET", "utf8mb4"),
+}
 FLASK_SECRET_KEY = "population-insight-course-design"
 WEB_PAGE_SIZE = 10
 

@@ -10,7 +10,7 @@
 
 - 政务数据后台风格 UI：清爽、可信、信息密度高，支持折叠侧边栏和移动端导航。
 - 内置权限与账号体系：管理员和普通用户分权访问。
-- 支持人口数据新增、编辑、删除、筛选、排序、分页、导出。
+- 支持人口数据新增、编辑、删除、筛选、排序、分页、CSV 导入与导出。
 - 支持全国 1950-2025 年人口长序列分析。
 - 支持 31 个省级地区 2015-2024 年年度人口数据演示。
 - 支持中国地图热力展示，省份悬停高亮并显示人口指标。
@@ -164,6 +164,12 @@ python main.py
 | `/api/comparison` | 地区对比图表数据 |
 | `/api/prediction/chart` | 趋势预测图表数据 |
 
+## CSV 导入与导出
+
+- 导出：在 `/records` 人口数据管理页面点击“导出当前结果”，系统会按当前筛选条件导出 CSV 文件。
+- 导入：在 `/collection` 数据采集页面上传本地 `.csv` 文件，先预览识别结果，再确认导入到 MySQL/SQLite。
+- 示例文件：`samples/population_import_sample.csv`，可直接用于演示 CSV 上传导入。
+
 ## 预测说明
 
 趋势预测支持两类模式：
@@ -222,6 +228,34 @@ Population-Insight-main/
 - 人口统计与可视化展示
 - 数据治理平台原型
 - 课程答辩与项目演示
+
+## MySQL 配置
+
+项目默认仍使用 SQLite，本地演示无需额外配置。要切换到 MySQL，请先创建数据库：
+
+```sql
+CREATE DATABASE population_insight CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+安装依赖：
+
+```bash
+pip install -r requirements.txt
+```
+
+PowerShell 启动示例：
+
+```powershell
+$env:POPULATION_INSIGHT_DB_ENGINE="mysql"
+$env:MYSQL_HOST="127.0.0.1"
+$env:MYSQL_PORT="3306"
+$env:MYSQL_USER="root"
+$env:MYSQL_PASSWORD="你的MySQL密码"
+$env:MYSQL_DATABASE="population_insight"
+python app.py
+```
+
+首次启动时系统会自动在 MySQL 中创建业务表，并导入默认账号和演示数据。
 
 ## License
 

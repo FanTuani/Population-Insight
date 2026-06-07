@@ -116,6 +116,22 @@ def collect_population_records(raw_text: str = "", source_url: str = "") -> dict
     }
 
 
+def collect_population_records_from_file(filename: str, content: bytes) -> dict[str, Any]:
+    if not filename.lower().endswith(".csv"):
+        raise ValueError("目前仅支持上传 CSV 文件。")
+    if not content:
+        raise ValueError("上传的 CSV 文件为空。")
+
+    text = _decode_body(content, "utf-8-sig")
+    records = parse_population_records(text)
+    return {
+        "url": "",
+        "content_type": "uploaded-csv",
+        "record_count": len(records),
+        "records": records,
+    }
+
+
 def parse_population_records(raw_text: str) -> list[dict[str, Any]]:
     table_rows = _extract_html_tables(raw_text)
     records = _records_from_tables(table_rows)

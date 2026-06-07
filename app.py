@@ -22,6 +22,7 @@ from population_insight.db.initializer import init_database
 from population_insight.services.auth_service import login
 from population_insight.services.collection_service import (
     collect_population_records,
+    collect_population_records_from_file,
     decode_records,
     encode_records,
     import_collected_records,
@@ -331,10 +332,17 @@ def collection_view():
                 if import_summary["failed"] == 0:
                     return redirect(url_for("records_view"))
             else:
-                result = collect_population_records(
-                    raw_text=request.form.get("raw_text", ""),
-                    source_url=_clean_text(request.form.get("source_url")),
-                )
+                uploaded_file = request.files.get("csv_file")
+                if uploaded_file and uploaded_file.filename:
+                    result = collect_population_records_from_file(
+                        uploaded_file.filename,
+                        uploaded_file.read(),
+                    )
+                else:
+                    result = collect_population_records(
+                        raw_text=request.form.get("raw_text", ""),
+                        source_url=_clean_text(request.form.get("source_url")),
+                    )
                 preview_records = result["records"]
                 records_payload = encode_records(preview_records)
                 flash(f"已识别 {len(preview_records)} 条人口记录，请核对后导入。", "success")
@@ -466,7 +474,7 @@ def statistics_view():
 @login_required
 def charts_view():
     context = _base_context()
-    default_region = "全国"
+    default_region = context["province_region_options"][0] if context["province_region_options"] else ""
     default_year = context["province_year_options"][-1] if context["province_year_options"] else ""
     return render_template(
         "charts.html",

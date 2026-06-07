@@ -1,10 +1,15 @@
 from __future__ import annotations
 
-import sqlite3
 from typing import Any
 
 from population_insight.config import ALLOWED_SORT_FIELDS
-from population_insight.db.connection import fetch_all, fetch_one, get_connection
+from population_insight.db.connection import (
+    fetch_all,
+    fetch_one,
+    get_connection,
+    get_integrity_error_types,
+    is_unique_constraint_error,
+)
 from population_insight.services.log_service import log_operation
 from population_insight.utils.validators import validate_population_payload
 
@@ -77,8 +82,8 @@ def add_population_record(data_dict: dict[str, Any], username: str = "system") -
             )
             connection.commit()
             record_id = cursor.lastrowid
-    except sqlite3.IntegrityError as error:
-        if "UNIQUE constraint failed" in str(error):
+    except get_integrity_error_types() as error:
+        if is_unique_constraint_error(error):
             raise ValueError("同一地区同一年份的数据已存在。") from error
         raise ValueError("新增数据失败，请检查输入内容。") from error
 
@@ -156,8 +161,8 @@ def update_population_record(
                 values,
             )
             connection.commit()
-    except sqlite3.IntegrityError as error:
-        if "UNIQUE constraint failed" in str(error):
+    except get_integrity_error_types() as error:
+        if is_unique_constraint_error(error):
             raise ValueError("修改后会与已有地区年份记录冲突。") from error
         raise ValueError("修改数据失败。") from error
 

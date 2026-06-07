@@ -7,6 +7,9 @@ __pycache__/
 *.pyc
 *.pyo
 flask_server*.log
+flask_*.log
+_run_flask_evidence.py
+.idea/
 
 # Keep the seeded SQLite database, ignore transient SQLite side files.
 data/*.db-shm
@@ -18,3 +21,10 @@ output/charts/*
 !output/charts/.gitkeep
 output/exports/*
 !output/exports/.gitkeep
+output/docx_render/
+output/import_samples/
+output/mysql_evidence/
+output/playwright/
+output/table_evidence/
+output/*.docx
+docs/ppt/
