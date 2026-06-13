@@ -1,0 +1,4 @@
+region,year,total_population,male_population,female_population,birth_rate,death_rate,aging_rate,urbanization_rate,remarks
+CSV示例导入区A,2032,520000,268000,252000,8.60,6.10,17.30,72.50,CSV导入功能演示样例A
+CSV示例导入区B,2033,680000,348500,331500,7.95,6.45,18.80,75.20,CSV导入功能演示样例B
+CSV示例导入区C,2034,910000,462000,448000,7.20,6.90,20.10,78.60,CSV导入功能演示样例C

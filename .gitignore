@@ -22,6 +22,8 @@ output/charts/*
 output/exports/*
 !output/exports/.gitkeep
 output/docx_render/
+output/docx_render_*/
+output/manual_soffice_test/
 output/import_samples/
 output/mysql_evidence/
 output/playwright/
