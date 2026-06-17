@@ -39,6 +39,19 @@ class MySQLConnectionAdapter:
         self._connection.commit()
 
 
+class SQLiteConnectionAdapter:
+    def __init__(self, raw_connection: sqlite3.Connection):
+        self._connection = raw_connection
+
+    def __enter__(self):
+        return self._connection
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if exc_type:
+            self._connection.rollback()
+        self._connection.close()
+
+
 def _split_sql_script(script: str) -> list[str]:
     return [statement.strip() for statement in script.split(";") if statement.strip()]
 
@@ -97,7 +110,7 @@ def get_connection():
     connection = sqlite3.connect(DB_PATH)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON")
-    return connection
+    return SQLiteConnectionAdapter(connection)
 
 
 def execute_query(connection, query: str, params: Iterable[Any] | None = None):

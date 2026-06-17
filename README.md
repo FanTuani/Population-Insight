@@ -62,6 +62,32 @@ http://127.0.0.1:5000
 python main.py
 ```
 
+## 自动化验收测试
+
+项目内置一套验收与回归测试，可检查数据库初始化、登录权限、主要页面、核心 API、CRUD、CSV 导入导出、统计、对比、预测和预警，并生成 HTML 报告与关键页面截图。
+
+安装测试依赖：
+
+```bash
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+python -m playwright install chromium
+```
+
+运行完整验收：
+
+```bash
+python scripts/run_acceptance_tests.py
+```
+
+报告输出位置：
+
+```text
+output/automated_tests/latest/index.html
+```
+
+测试默认使用临时 SQLite 数据库，不会写入 `data/population_insight.db`。
+
 ## 首次启动自动初始化
 
 首次运行时系统会自动完成：

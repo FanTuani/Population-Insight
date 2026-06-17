@@ -2,11 +2,11 @@ import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = BASE_DIR / "data"
-OUTPUT_DIR = BASE_DIR / "output"
+DATA_DIR = Path(os.getenv("POPULATION_INSIGHT_DATA_DIR", BASE_DIR / "data")).expanduser()
+OUTPUT_DIR = Path(os.getenv("POPULATION_INSIGHT_OUTPUT_DIR", BASE_DIR / "output")).expanduser()
 CHART_DIR = OUTPUT_DIR / "charts"
 EXPORT_DIR = OUTPUT_DIR / "exports"
-DB_PATH = DATA_DIR / "population_insight.db"
+DB_PATH = Path(os.getenv("POPULATION_INSIGHT_DB_PATH", DATA_DIR / "population_insight.db")).expanduser()
 DB_ENGINE = os.getenv("POPULATION_INSIGHT_DB_ENGINE", "sqlite").strip().lower()
 MYSQL_CONFIG = {
     "host": os.getenv("MYSQL_HOST", "127.0.0.1"),

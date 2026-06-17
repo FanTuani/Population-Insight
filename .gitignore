@@ -1,6 +1,8 @@
 .venv/
 .playwright-cli/
 .pytest_cache/
+.coverage
+.tmp/
 .DS_Store
 __pycache__/
 **/__pycache__/
@@ -27,6 +29,7 @@ output/manual_soffice_test/
 output/import_samples/
 output/mysql_evidence/
 output/playwright/
+output/automated_tests/
 output/table_evidence/
 output/*.docx
 docs/ppt/
